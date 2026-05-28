@@ -73,9 +73,17 @@
 
         /* ─── Shape selector bar ─── */
         #shape-bar {
-            position: fixed; bottom: clamp(16px, 3vh, 30px); left: 50%; transform: translateX(-50%);
+            position: fixed; bottom: clamp(60px, 10vh, 100px); left: 50%; transform: translateX(-50%);
             display: flex; gap: 8px; z-index: 10;
         }
+        #copy-link {
+            position: fixed; bottom: clamp(16px, 3vh, 30px); left: 50%; transform: translateX(-50%);
+            background: rgba(68,255,255,0.1); border: 1px solid rgba(68,255,255,0.3);
+            color: #4ff; padding: 6px 16px; border-radius: 20px;
+            font-size: 0.8rem; cursor: pointer; z-index: 10;
+            transition: all 0.3s; user-select: none;
+        }
+        #copy-link:hover { background: rgba(68,255,255,0.2); }
         .shape-btn {
             width: clamp(32px, 6vw, 44px); height: clamp(32px, 6vw, 44px);
             border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.15);
@@ -138,7 +146,7 @@
     <!-- 本地自托管，避免国内访问 jsdelivr/cdnflare 超时 -->
     <link rel="preload" href="mediapipe/hands_solution_simd_wasm_bin.wasm" as="fetch" crossorigin>
     <link rel="preload" href="mediapipe/hands_solution_packed_assets.data" as="fetch" crossorigin>
-    <link rel="preload" href="mediapipe/hand_landmark_lite.bin" as="fetch" crossorigin>
+    <link rel="preload" href="mediapipe/hand_landmark_full.bin" as="fetch" crossorigin>
     <script src="mediapipe/three.min.js"></script>
     <script src="mediapipe/camera_utils.js"></script>
     <script src="mediapipe/hands.js"></script>
@@ -167,11 +175,18 @@
 
     <div id="shape-bar">
         <button class="shape-btn active" data-shape="galaxy" title="星系">✦</button>
+        <button class="shape-btn" data-shape="blackhole" title="黑洞">🕳️</button>
+        <button class="shape-btn" data-shape="nebula" title="星云">🌌</button>
+        <button class="shape-btn" data-shape="dna" title="DNA">🧬</button>
         <button class="shape-btn" data-shape="earth" title="地球">🌍</button>
         <button class="shape-btn" data-shape="saturn" title="土星">🪐</button>
         <button class="shape-btn" data-shape="solar" title="太阳系">☀️</button>
+        <button class="shape-btn" data-shape="crystal" title="水晶">💎</button>
+        <button class="shape-btn" data-shape="tree" title="生命之树">🌳</button>
+        <button class="shape-btn" data-shape="meteor" title="陨石坠落">☄️</button>
         <button class="shape-btn" data-shape="heart" title="爱心">❤️</button>
     </div>
+    <div id="copy-link" onclick="navigator.clipboard.writeText(location.href).then(()=>{this.textContent='✅ 已复制';setTimeout(()=>this.textContent='🔗 分享给朋友',1500)})">🔗 分享给朋友</div>
 
     <div id="hand-indicators">
         <div class="hand-dot" id="hand-L" title="左手"></div>
@@ -191,7 +206,7 @@ const GALAXY_RADIUS = 14;
 const GALAXY_ARMS = 4;
 const GALAXY_TWIST = 2.5;
 
-const SHAPES = ['galaxy', 'earth', 'saturn', 'solar', 'heart'];
+const SHAPES = ['galaxy', 'blackhole', 'nebula', 'dna', 'earth', 'saturn', 'solar', 'crystal', 'tree', 'meteor', 'heart'];
 let currentShapeIndex = 0;
 
 // ═══════════════════════════════════════════════
@@ -261,189 +276,556 @@ scene.add(glow);
 //  SHAPE GENERATORS
 // ═══════════════════════════════════════════════
 
+// ─── 辅助：球面分布 ───
+function spherePoint(i, n, R) {
+    const phi = Math.acos(1 - 2*(i+0.5)/n);
+    const theta = Math.sqrt(n * Math.PI) * phi;
+    return { x: R*Math.sin(phi)*Math.cos(theta), y: R*Math.cos(phi), z: R*Math.sin(phi)*Math.sin(theta) };
+}
+function setPos(i, x, y, z) { targetPositions[i*3]=x; targetPositions[i*3+1]=y; targetPositions[i*3+2]=z; }
+function setCol(i, r, g, b) { targetColors[i*3]=r; targetColors[i*3+1]=g; targetColors[i*3+2]=b; }
+
+// ─── 1. 星系（美化：更丰富的旋臂颜色 + 中心发光）───
 function generateGalaxy() {
     for (let i = 0; i < PARTICLE_COUNT; i++) {
         const armIdx = Math.floor(Math.random() * GALAXY_ARMS);
         const armAngle = (armIdx / GALAXY_ARMS) * Math.PI * 2;
-        const r = Math.pow(Math.random(), 0.6) * GALAXY_RADIUS;
+        const r = Math.pow(Math.random(), 0.55) * GALAXY_RADIUS;
         const twist = r * GALAXY_TWIST / GALAXY_RADIUS;
-        const angle = armAngle + twist + (Math.random() - 0.5) * 1.2;
-        const scatter = (Math.random() - 0.5) * (r * 0.15 + 0.5);
-        const x = Math.cos(angle) * r + scatter;
-        const z = Math.sin(angle) * r + scatter;
-        const y = (Math.random() - 0.5) * (1.5 - r * 0.06) * Math.exp(-r * 0.15);
-
-        targetPositions[i*3] = x; targetPositions[i*3+1] = y; targetPositions[i*3+2] = z;
-
+        const angle = armAngle + twist + (Math.random()-0.5)*1.0;
+        const scatter = (Math.random()-0.5)*(r*0.12+0.4);
+        const x = Math.cos(angle)*r + scatter;
+        const z = Math.sin(angle)*r + scatter;
+        const y = (Math.random()-0.5)*(1.8-r*0.07)*Math.exp(-r*0.12);
+        setPos(i, x, y, z);
         const dr = r / GALAXY_RADIUS;
         let cr, cg, cb;
-        if (dr < 0.2)      { cr = 0.7+Math.random()*0.3; cg = 0.8+Math.random()*0.2; cb = 1.0; }
-        else if (dr < 0.6) { cr = 0.9+Math.random()*0.1; cg = 0.6+Math.random()*0.3; cb = 0.2+Math.random()*0.2; }
-        else               { cr = 0.6+Math.random()*0.3; cg = 0.2+Math.random()*0.2; cb = 0.1+Math.random()*0.1; }
-        if (Math.random() < 0.05) { cr = 0.3; cg = 0.5; cb = 1.0; }
-
-        targetColors[i*3] = cr; targetColors[i*3+1] = cg; targetColors[i*3+2] = cb;
+        if (dr < 0.15) { cr=0.6+Math.random()*0.4; cg=0.7+Math.random()*0.3; cb=1.0; }
+        else if (dr < 0.4) { const t=dr/0.4; cr=0.85+t*0.1; cg=0.65-t*0.15; cb=0.9-t*0.6; }
+        else if (dr < 0.7) { cr=0.95; cg=0.55+Math.random()*0.2; cb=0.15+Math.random()*0.15; }
+        else { cr=0.7+Math.random()*0.2; cg=0.25+Math.random()*0.15; cb=0.08+Math.random()*0.08; }
+        if (Math.random()<0.03) { cr=0.4; cg=0.6; cb=1.0; }
+        setCol(i, cr, cg, cb);
     }
 }
 
+// ─── 2. 黑洞（吸积盘 + 光子环）───
+function generateBlackhole() {
+    let _s = 55;
+    function sr() { _s=(_s*16807)%2147483647; return(_s-1)/2147483646; }
+    // 黑洞本体（中心暗区）+ 多层环（类似土星环）+ 光子环 + 喷流
+    const ringBands = [
+        { inner:3.5, outer:5.5, thick:0.3, hue:0.05, count:0.15 },  // 内环（亮白热）
+        { inner:6, outer:8, thick:0.25, hue:0.08, count:0.2 },      // 中环（橙红）
+        { inner:9, outer:13, thick:0.4, hue:0.03, count:0.25 },     // 外环（暖黄）
+        { inner:14, outer:18, thick:0.5, hue:0.65, count:0.15 },    // 最外环（蓝）
+    ];
+    const jetCount = Math.floor(PARTICLE_COUNT * 0.1); // 喷流
+    const haloCount = PARTICLE_COUNT * 0.05; // 光晕
+    let idx = 0;
+    // 多层环
+    for (const band of ringBands) {
+        const n = Math.floor(PARTICLE_COUNT * band.count);
+        for (let j = 0; j < n && idx < PARTICLE_COUNT; j++, idx++) {
+            const angle = sr() * Math.PI * 2;
+            const r = band.inner + sr() * (band.outer - band.inner);
+            const wobble = (sr()-0.5) * band.thick;
+            // 卡西尼缝（环间间隙）
+            const gapCenter = (band.inner + band.outer) / 2;
+            const gapDist = Math.abs(r - gapCenter);
+            const gapFade = gapDist < 0.4 ? 0.15 : 1;
+            setPos(idx, r*Math.cos(angle), wobble, r*Math.sin(angle));
+            const heat = 1 - Math.min((r-3.5)/15, 1);
+            const rgb = hsl2rgb(band.hue + (sr()-0.5)*0.03, 0.7, (0.3+heat*0.5)*gapFade);
+            setCol(idx, rgb[0], rgb[1], rgb[2]);
+        }
+    }
+    // 相对论喷流（上下两束）
+    for (let j = 0; j < jetCount && idx < PARTICLE_COUNT; j++, idx++) {
+        const up = j < jetCount/2;
+        const t = sr();
+        const spread = t * 1.5;
+        const x = (sr()-0.5) * spread;
+        const z = (sr()-0.5) * spread;
+        const y = up ? t * 18 : -t * 18;
+        setPos(idx, x, y, z);
+        const b = 0.4 + t * 0.5;
+        setCol(idx, 0.3+b*0.3, 0.5+b*0.3, 1.0);
+    }
+    // 光晕
+    for (let j = 0; j < haloCount && idx < PARTICLE_COUNT; j++, idx++) {
+        const theta = sr()*Math.PI*2;
+        const phi = Math.acos(2*sr()-1);
+        const r = 1 + sr()*2.5;
+        setPos(idx, r*Math.sin(phi)*Math.cos(theta), r*Math.sin(phi)*Math.sin(theta), r*Math.cos(phi));
+        setCol(idx, 0.4+sr()*0.3, 0.2+sr()*0.2, 0.1+sr()*0.15);
+    }
+    while (idx < PARTICLE_COUNT) {
+        setPos(idx, (sr()-0.5)*30, (sr()-0.5)*4, (sr()-0.5)*30);
+        setCol(idx, 0.1+sr()*0.1, 0.05+sr()*0.1, 0.15+sr()*0.15);
+        idx++;
+    }
+}
+
+// ─── 3. 星云（彩色气体云）───
+function generateNebula() {
+    // 改进版：多层密度云 + 噪声扰动 + 中心亮星
+    let _s = 77;
+    function sr() { _s=(_s*16807)%2147483647; return(_s-1)/2147483646; }
+    const clouds = [
+        { cx:0, cy:0, cz:0, R:9, hue:0.75, sat:0.7, n:0.35 },   // 紫
+        { cx:5, cy:2, cz:-3, R:7, hue:0.6, sat:0.8, n:0.25 },    // 蓝
+        { cx:-4, cy:-1, cz:4, R:6, hue:0.95, sat:0.6, n:0.18 },  // 红
+        { cx:1, cy:-3, cz:-5, R:5, hue:0.45, sat:0.5, n:0.12 },  // 绿
+        { cx:-3, cy:3, cz:2, R:4, hue:0.85, sat:0.65, n:0.1 },   // 粉
+    ];
+    let idx = 0;
+    for (const cl of clouds) {
+        const n = Math.floor(PARTICLE_COUNT * cl.n);
+        for (let j = 0; j < n && idx < PARTICLE_COUNT; j++, idx++) {
+            // 噪声扰动的球面分布
+            const r = Math.pow(sr(), 0.4) * cl.R;
+            const theta = sr() * Math.PI * 2;
+            const phi = Math.acos(2*sr()-1);
+            const nx = r*Math.sin(phi)*Math.cos(theta) + (sr()-0.5)*2;
+            const ny = r*Math.sin(phi)*Math.sin(theta) + (sr()-0.5)*2;
+            const nz = r*Math.cos(phi) + (sr()-0.5)*2;
+            setPos(idx, cl.cx+nx, cl.cy+ny, cl.cz+nz);
+            // 颜色：基于距离渐变
+            const dist = Math.sqrt(nx*nx+ny*ny+nz*nz) / cl.R;
+            const bright = 0.3 + (1-dist)*0.7;
+            const rgb = hsl2rgb(cl.hue + (sr()-0.5)*0.08, cl.sat, 0.3+dist*0.4);
+            setCol(idx, rgb[0]*bright, rgb[1]*bright, rgb[2]*bright);
+        }
+    }
+    // 散射背景粒子
+    while (idx < PARTICLE_COUNT) {
+        const r = 3+sr()*18;
+        const theta = sr()*Math.PI*2;
+        const phi = Math.acos(2*sr()-1);
+        setPos(idx, r*Math.sin(phi)*Math.cos(theta), r*Math.sin(phi)*Math.sin(theta), r*Math.cos(phi));
+        const rgb = hsl2rgb(0.7+sr()*0.3, 0.3+sr()*0.3, 0.2+sr()*0.3);
+        setCol(idx, rgb[0], rgb[1], rgb[2]);
+        idx++;
+    }
+}
+
+// ─── 4. DNA 双螺旋 ───
+function generateDNA() {
+    const strandCount = Math.floor(PARTICLE_COUNT * 0.7);
+    const bridgeCount = PARTICLE_COUNT - strandCount;
+    const perStrand = Math.floor(strandCount / 2);
+    const helixR = 3, helixH = 25, turns = 4;
+    for (let i = 0; i < strandCount; i++) {
+        const strand = i < perStrand ? 0 : 1;
+        const t = (i % perStrand) / perStrand;
+        const angle = t * Math.PI * 2 * turns + strand * Math.PI;
+        const y = (t - 0.5) * helixH;
+        const x = helixR * Math.cos(angle);
+        const z = helixR * Math.sin(angle);
+        const jitter = (Math.random()-0.5)*0.3;
+        setPos(i, x+jitter, y, z+jitter);
+        setCol(i, strand===0 ? 0.2 : 0.9, strand===0 ? 0.6 : 0.3, strand===0 ? 1.0 : 0.4);
+    }
+    for (let j = 0; j < bridgeCount; j++) {
+        const t = j / bridgeCount;
+        const angle1 = t * Math.PI * 2 * turns;
+        const angle2 = angle1 + Math.PI;
+        const y = (t - 0.5) * helixH;
+        const mt = Math.random();
+        const x = helixR * (Math.cos(angle1)*(1-mt) + Math.cos(angle2)*mt);
+        const z = helixR * (Math.sin(angle1)*(1-mt) + Math.sin(angle2)*mt);
+        setPos(strandCount+j, x, y, z);
+        const isAT = Math.random() > 0.5;
+        setCol(strandCount+j, isAT ? 0.9 : 0.3, isAT ? 0.8 : 0.9, isAT ? 0.2 : 0.3);
+    }
+}
+
+// ─── 5. 地球（美化：云层 + 大气光晕）───
 function generateEarth() {
     const R = 10;
     for (let i = 0; i < PARTICLE_COUNT; i++) {
-        // Sphere surface distribution with some depth
-        const phi = Math.acos(1 - 2 * (i + 0.5) / PARTICLE_COUNT);
+        const phi = Math.acos(1 - 2*(i+0.5)/PARTICLE_COUNT);
         const theta = Math.sqrt(PARTICLE_COUNT * Math.PI) * phi;
-        const jitter = (Math.random() - 0.5) * 0.4;
-
-        const x = (R + jitter) * Math.sin(phi) * Math.cos(theta);
-        const y = (R + jitter) * Math.cos(phi);
-        const z = (R + jitter) * Math.sin(phi) * Math.sin(theta);
-
-        targetPositions[i*3] = x; targetPositions[i*3+1] = y; targetPositions[i*3+2] = z;
-
-        // Color: simulate land/ocean with noise
-        const nx = Math.sin(phi) * Math.cos(theta);
-        const ny = Math.cos(phi);
-        const nz = Math.sin(phi) * Math.sin(theta);
-        // Simple pseudo-noise for continents
-        const noise = Math.sin(nx * 5 + 1.3) * Math.cos(nz * 4 + 0.7) * Math.sin(ny * 6 + 2.1);
+        const jitter = (Math.random()-0.5)*0.5;
+        const x = (R+jitter)*Math.sin(phi)*Math.cos(theta);
+        const y = (R+jitter)*Math.cos(phi);
+        const z = (R+jitter)*Math.sin(phi)*Math.sin(theta);
+        setPos(i, x, y, z);
+        const nx = Math.sin(phi)*Math.cos(theta), ny = Math.cos(phi), nz = Math.sin(phi)*Math.sin(theta);
+        const noise = Math.sin(nx*5+1.3)*Math.cos(nz*4+0.7)*Math.sin(ny*6+2.1);
         const polar = Math.abs(ny);
-
         let cr, cg, cb;
-        if (polar > 0.82) {
-            // Ice caps — white/blue
-            cr = 0.85 + Math.random()*0.15; cg = 0.9 + Math.random()*0.1; cb = 1.0;
-        } else if (noise > 0.15) {
-            // Land — green/brown
-            const landType = Math.random();
-            if (landType < 0.5) { cr = 0.15; cg = 0.45 + Math.random()*0.2; cb = 0.1; } // forest
-            else if (landType < 0.8) { cr = 0.55+Math.random()*0.2; cg = 0.4; cb = 0.2; } // desert
-            else { cr = 0.3; cg = 0.5; cb = 0.15; } // grassland
-        } else if (noise > -0.1) {
-            // Coast / shallow — light blue
-            cr = 0.1; cg = 0.4 + Math.random()*0.2; cb = 0.7;
-        } else {
-            // Ocean — deep blue
-            cr = 0.02 + Math.random()*0.05; cg = 0.1 + Math.random()*0.15; cb = 0.4 + Math.random()*0.25;
-        }
-        targetColors[i*3] = cr; targetColors[i*3+1] = cg; targetColors[i*3+2] = cb;
+        if (polar > 0.82) { cr=0.85+Math.random()*0.15; cg=0.9+Math.random()*0.1; cb=1.0; }
+        else if (noise > 0.15) { const lt=Math.random(); cr=lt<0.5?0.15:0.55; cg=lt<0.5?0.45+Math.random()*0.2:0.4; cb=lt<0.5?0.1:0.2; }
+        else if (noise > -0.1) { cr=0.1; cg=0.4+Math.random()*0.2; cb=0.7; }
+        else { cr=0.02+Math.random()*0.05; cg=0.1+Math.random()*0.15; cb=0.4+Math.random()*0.25; }
+        // 云层粒子（更亮更白）
+        if (Math.random() < 0.08) { cr=0.9; cg=0.92; cb=0.95; }
+        setCol(i, cr, cg, cb);
     }
 }
 
+// ─── 6. 土星（美化：更细腻的环带 + 星球条纹）───
 function generateSaturn() {
     const planetR = 6;
     const ringInner = 9, ringOuter = 14;
-    const planetCount = Math.floor(PARTICLE_COUNT * 0.45);
-    const ringCount = PARTICLE_COUNT - planetCount;
-
+    const planetCount = Math.floor(PARTICLE_COUNT * 0.4);
     for (let i = 0; i < PARTICLE_COUNT; i++) {
         if (i < planetCount) {
-            // Planet body
-            const phi = Math.acos(1 - 2 * (i + 0.5) / planetCount);
-            const theta = Math.sqrt(planetCount * Math.PI) * phi;
-            const jitter = (Math.random() - 0.5) * 0.3;
-            const x = (planetR + jitter) * Math.sin(phi) * Math.cos(theta);
-            const y = (planetR + jitter) * Math.cos(phi);
-            const z = (planetR + jitter) * Math.sin(phi) * Math.sin(theta);
-            targetPositions[i*3] = x; targetPositions[i*3+1] = y; targetPositions[i*3+2] = z;
-
-            // Bands: horizontal stripes
-            const band = Math.sin(phi * 8);
-            if (band > 0.3) { targetColors[i*3]=0.85; targetColors[i*3+1]=0.72; targetColors[i*3+2]=0.45; }
-            else if (band > -0.3) { targetColors[i*3]=0.75; targetColors[i*3+1]=0.62; targetColors[i*3+2]=0.38; }
-            else { targetColors[i*3]=0.65; targetColors[i*3+1]=0.55; targetColors[i*3+2]=0.35; }
+            const phi = Math.acos(1-2*(i+0.5)/planetCount);
+            const theta = Math.sqrt(planetCount*Math.PI)*phi;
+            const jitter = (Math.random()-0.5)*0.25;
+            setPos(i, (planetR+jitter)*Math.sin(phi)*Math.cos(theta), (planetR+jitter)*Math.cos(phi), (planetR+jitter)*Math.sin(phi)*Math.sin(theta));
+            const band = Math.sin(phi*10);
+            const eq = Math.abs(Math.cos(phi));
+            if (eq > 0.85) { setCol(i, 0.9, 0.8, 0.55); }
+            else if (band > 0.4) { setCol(i, 0.88, 0.75, 0.48); }
+            else if (band > -0.2) { setCol(i, 0.78, 0.65, 0.4); }
+            else { setCol(i, 0.68, 0.58, 0.36); }
         } else {
-            // Ring
             const ri = i - planetCount;
-            const angle = (ri / ringCount) * Math.PI * 2 * 8;
-            const radius = ringInner + Math.random() * (ringOuter - ringInner);
-            const x = radius * Math.cos(angle);
-            const z = radius * Math.sin(angle);
-            const y = (Math.random() - 0.5) * 0.3; // thin ring
-            targetPositions[i*3] = x; targetPositions[i*3+1] = y; targetPositions[i*3+2] = z;
-
-            // Ring color: mix of icy particles
-            const t = (radius - ringInner) / (ringOuter - ringInner);
-            targetColors[i*3] = 0.6 + t * 0.3;
-            targetColors[i*3+1] = 0.55 + t * 0.3;
-            targetColors[i*3+2] = 0.5 + t * 0.35;
+            const angle = (ri/(PARTICLE_COUNT-planetCount))*Math.PI*2*10;
+            const r = ringInner + Math.random()*(ringOuter-ringInner);
+            const gap = Math.abs(r - 11.5);
+            const gapFade = gap < 0.3 ? 0.2 : 1;
+            setPos(i, r*Math.cos(angle), (Math.random()-0.5)*0.25, r*Math.sin(angle));
+            const t = (r-ringInner)/(ringOuter-ringInner);
+            setCol(i, (0.55+t*0.35)*gapFade, (0.5+t*0.3)*gapFade, (0.45+t*0.35)*gapFade);
         }
     }
 }
 
+// ─── 7. 太阳系（美化：轨道线 + 行星发光）───
 function generateSolarSystem() {
     const sunR = 2.5;
     const planets = [
-        { name:'Mercury', r:3.5,  count:200,  color:[0.7,0.6,0.5] },
-        { name:'Venus',   r:5,    count:300,  color:[0.9,0.7,0.3] },
-        { name:'Earth',   r:7,    count:500,  color:[0.2,0.5,0.9] },
-        { name:'Mars',    r:9,    count:350,  color:[0.8,0.3,0.15] },
-        { name:'Jupiter', r:12,   count:1200, color:[0.8,0.65,0.4] },
-        { name:'Saturn',  r:16,   count:900,  color:[0.85,0.72,0.45] },
-        { name:'Uranus',  r:20,   count:600,  color:[0.5,0.8,0.85] },
-        { name:'Neptune', r:24,   count:550,  color:[0.2,0.3,0.85] },
+        { r:3.5, count:200, color:[0.7,0.6,0.5], glow:0 },
+        { r:5, count:300, color:[0.95,0.75,0.35], glow:0 },
+        { r:7, count:500, color:[0.2,0.5,0.9], glow:0.1 },
+        { r:9, count:350, color:[0.85,0.3,0.15], glow:0 },
+        { r:12, count:1200, color:[0.85,0.68,0.42], glow:0 },
+        { r:16, count:900, color:[0.88,0.75,0.48], glow:0 },
+        { r:20, count:600, color:[0.5,0.82,0.88], glow:0.05 },
+        { r:24, count:550, color:[0.2,0.3,0.88], glow:0.05 },
     ];
     const totalPlanetP = planets.reduce((s,p) => s + p.count, 0);
     const sunCount = PARTICLE_COUNT - totalPlanetP;
-
     let idx = 0;
-
-    // Sun
     for (let i = 0; i < sunCount; i++) {
-        const phi = Math.acos(1 - 2*(i+0.5)/sunCount);
-        const theta = Math.sqrt(sunCount * Math.PI) * phi;
-        const j = (Math.random()-0.5)*0.3;
-        targetPositions[idx*3] = (sunR+j)*Math.sin(phi)*Math.cos(theta);
-        targetPositions[idx*3+1] = (sunR+j)*Math.cos(phi);
-        targetPositions[idx*3+2] = (sunR+j)*Math.sin(phi)*Math.sin(theta);
-        const bright = 0.8 + Math.random()*0.2;
-        targetColors[idx*3] = bright; targetColors[idx*3+1] = bright*0.7; targetColors[idx*3+2] = bright*0.2;
+        const sp = spherePoint(i, sunCount, sunR);
+        setPos(idx, sp.x, sp.y, sp.z);
+        const bright = 0.85+Math.random()*0.15;
+        setCol(idx, bright, bright*0.75, bright*0.2);
         idx++;
     }
-
-    // Planets
     for (const p of planets) {
         for (let i = 0; i < p.count; i++) {
-            const angle = (i / p.count) * Math.PI * 2 + Math.random() * 0.3;
-            const radius = p.r + (Math.random()-0.5)*0.4;
-            const y = (Math.random()-0.5)*0.3;
-            targetPositions[idx*3] = radius * Math.cos(angle);
-            targetPositions[idx*3+1] = y;
-            targetPositions[idx*3+2] = radius * Math.sin(angle);
-            const v = 0.8 + Math.random()*0.2;
-            targetColors[idx*3] = p.color[0]*v; targetColors[idx*3+1] = p.color[1]*v; targetColors[idx*3+2] = p.color[2]*v;
+            const angle = (i/p.count)*Math.PI*2 + Math.random()*0.2;
+            const radius = p.r + (Math.random()-0.5)*0.35;
+            const y = (Math.random()-0.5)*0.25;
+            setPos(idx, radius*Math.cos(angle), y, radius*Math.sin(angle));
+            const v = 0.8+Math.random()*0.2;
+            setCol(idx, p.color[0]*v+p.glow, p.color[1]*v+p.glow, p.color[2]*v+p.glow);
             idx++;
         }
     }
-    // Fill remaining with asteroid belt / dust
     while (idx < PARTICLE_COUNT) {
-        const a = Math.random() * Math.PI * 2;
-        const r = 10 + Math.random() * 1.5;
-        targetPositions[idx*3] = r*Math.cos(a);
-        targetPositions[idx*3+1] = (Math.random()-0.5)*0.5;
-        targetPositions[idx*3+2] = r*Math.sin(a);
-        targetColors[idx*3]=0.4; targetColors[idx*3+1]=0.35; targetColors[idx*3+2]=0.3;
+        const a = Math.random()*Math.PI*2;
+        const r = 10+Math.random()*1.5;
+        setPos(idx, r*Math.cos(a), (Math.random()-0.5)*0.4, r*Math.sin(a));
+        setCol(idx, 0.4, 0.35, 0.3);
         idx++;
     }
 }
 
-function generateHeart() {
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-        const t = (i / PARTICLE_COUNT) * Math.PI * 2;
-        const hx = 16 * Math.pow(Math.sin(t), 3);
-        const hy = 13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t);
-        const fillR = Math.pow(Math.random(), 0.5);
-        const scale = 0.5;
-        targetPositions[i*3] = hx*scale*fillR + (Math.random()-0.5)*0.5;
-        targetPositions[i*3+1] = hy*scale*fillR + (Math.random()-0.5)*0.5;
-        targetPositions[i*3+2] = (Math.random()-0.5)*3*fillR;
-        const brightness = 0.5 + fillR*0.5;
-        targetColors[i*3] = brightness; targetColors[i*3+1] = 0.05+Math.random()*0.15; targetColors[i*3+2] = 0.1+Math.random()*0.2;
+// ─── 8. 水晶（多面体 + 内部折射光线）───
+function generateCrystal() {
+    // 改进版：正二十面体棱面 + 内部光线 + 虹彩
+    let _s = 123;
+    function sr() { _s=(_s*16807)%2147483647; return(_s-1)/2147483646; }
+    // 正二十面体的12个顶点
+    const phi_ratio = (1+Math.sqrt(5))/2;
+    const icoVerts = [
+        [0,1,phi_ratio],[0,1,-phi_ratio],[0,-1,phi_ratio],[0,-1,-phi_ratio],
+        [1,phi_ratio,0],[-1,phi_ratio,0],[1,-phi_ratio,0],[-1,-phi_ratio,0],
+        [phi_ratio,0,1],[-phi_ratio,0,1],[phi_ratio,0,-1],[-phi_ratio,0,-1]
+    ];
+    // 归一化并放大
+    const S = 7;
+    const verts = icoVerts.map(v => {
+        const m = Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);
+        return [v[0]/m*S, v[1]/m*S, v[2]/m*S];
+    });
+    // 20个三角面（正二十面体）
+    const faces = [
+        [0,1,5],[0,5,3],[0,3,2],[0,2,8],[0,8,1],
+        [4,1,0],[4,0,8],[4,8,6],[4,6,10],[4,10,1],
+        [9,3,5],[9,5,1],[9,1,11],[9,11,3],[9,3,7],
+        [6,8,2],[6,2,7],[6,7,3],[6,3,10],[6,10,7]
+    ];
+    const perFace = Math.floor(PARTICLE_COUNT / faces.length);
+    let idx = 0;
+    for (let fi = 0; fi < faces.length && idx < PARTICLE_COUNT; fi++) {
+        const [a,b,c] = faces[fi].map(i => verts[i]);
+        for (let j = 0; j < perFace && idx < PARTICLE_COUNT; j++, idx++) {
+            const u = sr(), v = sr() * (1-u);
+            const x = a[0]*(1-u-v) + b[0]*u + c[0]*v;
+            const y = a[1]*(1-u-v) + b[1]*u + c[1]*v;
+            const z = a[2]*(1-u-v) + b[2]*u + c[2]*v;
+            const jitter = (sr()-0.5)*0.3;
+            setPos(idx, x+jitter, y+jitter, z+jitter);
+            // 棱面颜色：每个面不同色相
+            const hue = (fi/faces.length)*0.4 + 0.5;
+            const edgeDist = Math.min(u, v, 1-u-v);
+            const edgeBright = edgeDist < 0.05 ? 1.8 : 1.0; // 棱边高亮
+            const rgb = hsl2rgb(hue + (sr()-0.5)*0.05, 0.4+sr()*0.3, (0.4+sr()*0.35)*edgeBright);
+            setCol(idx, Math.min(rgb[0],1), Math.min(rgb[1],1), Math.min(rgb[2],1));
+        }
+    }
+    // 内部光线粒子
+    while (idx < PARTICLE_COUNT) {
+        const r = sr() * S * 0.7;
+        const theta = sr()*Math.PI*2;
+        const phi = Math.acos(2*sr()-1);
+        setPos(idx, r*Math.sin(phi)*Math.cos(theta), r*Math.sin(phi)*Math.sin(theta), r*Math.cos(phi));
+        const rgb = hsl2rgb(0.6+sr()*0.3, 0.5, 0.6+sr()*0.3);
+        setCol(idx, rgb[0], rgb[1], rgb[2]);
+        idx++;
+    }
+}
+function hsl2rgb(h, s, l) {
+    h = ((h%1)+1)%1;
+    const c=(1-Math.abs(2*l-1))*s, x=c*(1-Math.abs((h*6)%2-1)), m=l-c/2;
+    let r,g,b;
+    if(h<1/6){r=c;g=x;b=0;}else if(h<2/6){r=x;g=c;b=0;}else if(h<3/6){r=0;g=c;b=x;}
+    else if(h<4/6){r=0;g=x;b=c;}else if(h<5/6){r=x;g=0;b=c;}else{r=c;g=0;b=x;}
+    return[r+m,g+m,b+m];
+}
+
+// ─── 8.5 陨石坠落（手势控制方向）───
+function generateMeteor() {
+    let _s = 99;
+    function sr() { _s=(_s*16807)%2147483647; return(_s-1)/2147483646; }
+    // 3条陨石轨迹 + 碎片云 + 地面碎片
+    const trailCount = Math.floor(PARTICLE_COUNT * 0.45);
+    const debrisCount = Math.floor(PARTICLE_COUNT * 0.35);
+    const groundCount = PARTICLE_COUNT - trailCount - debrisCount;
+    let idx = 0;
+    // 陨石轨迹（从上往下，带火焰尾迹）
+    for (let t = 0; t < 3; t++) {
+        const n = Math.floor(trailCount / 3);
+        const startX = (sr()-0.5)*20;
+        const startZ = (sr()-0.5)*20;
+        const angle = (sr()-0.5)*0.3;
+        for (let j = 0; j < n && idx < PARTICLE_COUNT; j++, idx++) {
+            const progress = j/n;
+            const y = 15 - progress * 30;
+            const x = startX + Math.sin(angle)*progress*8 + (sr()-0.5)*(1+progress*3);
+            const z = startZ + Math.cos(angle)*progress*8 + (sr()-0.5)*(1+progress*3);
+            setPos(idx, x, y, z);
+            // 火焰渐变：头部白热→尾部暗红
+            const heat = 1 - progress*0.8;
+            setCol(idx, 1, 0.5+heat*0.5, heat*0.3);
+        }
+    }
+    // 碎片粒子（散布在轨迹周围）
+    for (let j = 0; j < debrisCount; j++, idx++) {
+        const trail = Math.floor(sr()*3);
+        const progress = sr();
+        const baseX = (sr()-0.5)*20 + Math.sin((sr()-0.5)*0.3)*progress*8;
+        const baseZ = (sr()-0.5)*20 + Math.cos((sr()-0.5)*0.3)*progress*8;
+        const y = 15 - progress*30;
+        const spread = progress * 4;
+        setPos(idx, baseX+(sr()-0.5)*spread, y+(sr()-0.5)*2, baseZ+(sr()-0.5)*spread);
+        const bright = sr();
+        setCol(idx, 0.8+bright*0.2, 0.3+bright*0.3, 0.1+bright*0.15);
+    }
+    // 地面碎片环（撞击点）
+    for (let j = 0; j < groundCount; j++, idx++) {
+        const a = sr()*Math.PI*2;
+        const r = Math.pow(sr(),0.5)*8;
+        const y = -14 + sr()*2;
+        setPos(idx, Math.cos(a)*r, y, Math.sin(a)*r);
+        const bright = sr();
+        setCol(idx, 0.6+bright*0.3, 0.2+bright*0.2, 0.05+bright*0.1);
+    }
+    // 存储轨迹数据供动画使用
+    window._meteorTrails = [];
+    for (let t = 0; t < 3; t++) {
+        window._meteorTrails.push({
+            startX: (sr()-0.5)*20,
+            startZ: (sr()-0.5)*20,
+            angle: (sr()-0.5)*0.3,
+            speed: 0.3 + sr()*0.3
+        });
     }
 }
 
-// Shape registry
-const shapeGenerators = { galaxy: generateGalaxy, earth: generateEarth, saturn: generateSaturn, solar: generateSolarSystem, heart: generateHeart };
-const shapeLabels = { galaxy: '✦ GALAXY', earth: '🌍 EARTH', saturn: '🪐 SATURN', solar: '☀️ SOLAR SYSTEM', heart: '❤️ HEART' };
+// ─── 9. 生命之树（分形树 + 发光叶片）───
+function generateTree() {
+    // ─── 极简有机树：手绘风格粒子树 ───
+    // 核心：用贝塞尔曲线画枝干路径，沿线散布粒子
+    let _s = 42;
+    function sr() { _s = (_s * 16807) % 2147483647; return (_s - 1) / 2147483646; }
+
+    // 贝塞尔曲线插值
+    function bezier(t, p0, p1, p2, p3) {
+        const u = 1-t, u2 = u*u, u3 = u2*u, t2 = t*t, t3 = t2*t;
+        return u3*p0 + 3*u2*t*p1 + 3*u*t2*p2 + t3*p3;
+    }
+
+    // 沿贝塞尔曲线散布粒子
+    function scatterCurve(pts, count, radius, type) {
+        const result = [];
+        for (let i = 0; i < count; i++) {
+            const t = sr();
+            const x = bezier(t, pts[0].x, pts[1].x, pts[2].x, pts[3].x);
+            const y = bezier(t, pts[0].y, pts[1].y, pts[2].y, pts[3].y);
+            const z = bezier(t, pts[0].z, pts[1].z, pts[2].z, pts[3].z);
+            const r = radius * (1 - t * 0.85);
+            const a = sr() * Math.PI * 2;
+            const d = sr() * r;
+            result.push({
+                x: x + Math.cos(a) * d + (sr()-0.5)*0.15,
+                y: y + (sr()-0.5) * d * 0.4,
+                z: z + Math.sin(a) * d + (sr()-0.5)*0.15,
+                type
+            });
+        }
+        return result;
+    }
+
+    // 叶簇：不规则球形
+    function leafCluster(cx, cy, cz, radius, count) {
+        const result = [];
+        const blobs = 2 + Math.floor(sr() * 3);
+        for (let b = 0; b < blobs; b++) {
+            const bx = cx + (sr()-0.5) * radius * 0.8;
+            const by = cy + sr() * radius * 0.4 + 0.5; // 向上偏移，不在下方扩散
+            const bz = cz + (sr()-0.5) * radius * 0.8;
+            const br = radius * (0.2 + sr() * 0.3); // 缩小子球体
+            for (let i = 0; i < count/blobs; i++) {
+                const theta = sr() * Math.PI * 2;
+                const phi = Math.acos(2 * sr() - 1);
+                const r = Math.pow(sr(), 0.4) * br;
+                result.push({
+                    x: bx + r * Math.sin(phi) * Math.cos(theta),
+                    y: by + r * Math.sin(phi) * Math.sin(theta) * 0.4, // 压扁Y轴
+                    z: bz + r * Math.cos(phi),
+                    type: 'leaf'
+                });
+            }
+        }
+        return result;
+    }
+
+    const allPts = [];
+
+    // 主干1（弯曲向上，深棕色）
+    allPts.push(...scatterCurve([
+        {x:-0.5,y:-10,z:0.2}, {x:-0.2,y:-4,z:0.1}, {x:0.3,y:2,z:-0.1}, {x:0.8,y:8,z:0.3}
+    ], 1500, 1.8, 'bark'));
+
+    // 主干2（分叉，深棕色）
+    allPts.push(...scatterCurve([
+        {x:0.5,y:-10,z:-0.3}, {x:0.8,y:-3,z:-0.2}, {x:1.5,y:3,z:0.1}, {x:2.2,y:7,z:-0.2}
+    ], 1000, 1.2, 'bark'));
+
+    // 一级枝（从主干末端伸出）
+    const b1Curves = [
+        [{x:0.8,y:8,z:0.3},{x:2,y:10,z:1},{x:4,y:12,z:1.5},{x:6,y:13,z:2}],
+        [{x:0.8,y:8,z:0.3},{x:-1,y:11,z:0.5},{x:-3,y:13,z:0},{x:-5,y:14,z:-1}],
+        [{x:0.8,y:8,z:0.3},{x:1,y:11,z:-1},{x:0,y:14,z:-2},{x:-1,y:15,z:-3}],
+        [{x:2.2,y:7,z:-0.2},{x:3.5,y:9,z:-1},{x:5,y:11,z:-2},{x:6,y:12,z:-2.5}],
+        [{x:2.2,y:7,z:-0.2},{x:3,y:10,z:0.5},{x:5,y:13,z:1},{x:7,y:14,z:0.5}],
+    ];
+    for (const curve of b1Curves) {
+        allPts.push(...scatterCurve(curve, 500, 0.6, 'branch'));
+    }
+
+    // 二级枝 + 叶簇
+    // 只在树冠外围末端生成叶簇，中间不留叶片
+    const b2Ends = [
+        {x:6,y:13,z:2},{x:-5,y:14.5,z:-1},{x:-1.5,y:15.5,z:-3.5},
+        {x:6.5,y:12.5,z:-2.5},{x:7.5,y:14.5,z:0.5},
+        {x:-3.5,y:13.5,z:0.5},{x:0.5,y:15,z:-2.5},{x:5.5,y:11.5,z:-2},{x:5.5,y:13.5,z:1.5},
+    ];
+    for (const end of b2Ends) {
+        // 小枝
+        const a = sr() * Math.PI * 2;
+        const len = 3 + sr() * 2.5; // 更长的伸展
+        allPts.push(...scatterCurve([
+            {x:end.x, y:end.y, z:end.z},
+            {x:end.x+Math.cos(a)*len*0.3, y:end.y+1, z:end.z+Math.sin(a)*len*0.3},
+            {x:end.x+Math.cos(a)*len*0.7, y:end.y+2, z:end.z+Math.sin(a)*len*0.7},
+            {x:end.x+Math.cos(a)*len, y:end.y+2.5, z:end.z+Math.sin(a)*len}
+        ], 150, 0.15, 'twig'));
+        // 叶簇
+        allPts.push(...leafCluster(end.x+Math.cos(a)*len, end.y+2.5, end.z+Math.sin(a)*len, 1.8+sr()*1.5, 1000));
+    }
+
+    // 主干底部根须
+    for (let i = 0; i < 4; i++) {
+        const a = (i/4)*Math.PI*2 + sr()*0.5;
+        allPts.push(...scatterCurve([
+            {x:Math.cos(a)*0.5, y:-10, z:Math.sin(a)*0.5},
+            {x:Math.cos(a)*1.5, y:-11, z:Math.sin(a)*1.5},
+            {x:Math.cos(a)*3, y:-11.5, z:Math.sin(a)*3},
+            {x:Math.cos(a)*4, y:-11.5, z:Math.sin(a)*4}
+        ], 80, 0.3, 'root'));
+    }
+
+    // 补足到 PARTICLE_COUNT（只在树冠外围散布少量散落叶片）
+    while (allPts.length < PARTICLE_COUNT) {
+        const a = sr() * Math.PI * 2;
+        const r = 8 + sr() * 6;
+        allPts.push({
+            x: Math.cos(a) * r + (sr()-0.5)*2,
+            y: 10 + sr() * 6,
+            z: Math.sin(a) * r + (sr()-0.5)*2,
+            type: 'leaf'
+        });
+    }
+
+    for (let i = 0; i < Math.min(allPts.length, PARTICLE_COUNT); i++) {
+        const p = allPts[i];
+        setPos(i, p.x, p.y, p.z);
+        if (p.type === 'bark') {
+            setCol(i, 0.3+sr()*0.1, 0.15+sr()*0.06, 0.05+sr()*0.03);
+        } else if (p.type === 'branch') {
+            setCol(i, 0.25+sr()*0.08, 0.12+sr()*0.05, 0.05+sr()*0.03);
+        } else if (p.type === 'twig') {
+            setCol(i, 0.2+sr()*0.06, 0.15+sr()*0.05, 0.06+sr()*0.03);
+        } else if (p.type === 'root') {
+            setCol(i, 0.25+sr()*0.08, 0.15+sr()*0.05, 0.06+sr()*0.03);
+        } else { // leaf
+            const g = 0.45+sr()*0.45;
+            setCol(i, 0.05+sr()*0.1, g, 0.05+sr()*0.08);
+        }
+    }
+}
+
+// ─── 10. 爱心（美化：渐变 + 呼吸感）───
+function generateHeart() {
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const t = (i/PARTICLE_COUNT)*Math.PI*2;
+        const hx = 16*Math.pow(Math.sin(t),3);
+        const hy = 13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t);
+        const fillR = Math.pow(Math.random(),0.4);
+        const scale = 0.5;
+        setPos(i, hx*scale*fillR+(Math.random()-0.5)*0.4, hy*scale*fillR+(Math.random()-0.5)*0.4, (Math.random()-0.5)*3*fillR);
+        const dist = fillR;
+        const cr = 0.9+Math.random()*0.1;
+        const cg = 0.1+dist*0.4+Math.random()*0.1;
+        const cb = 0.15+dist*0.3+Math.random()*0.15;
+        setCol(i, cr, cg, cb);
+    }
+}
+
+// ─── 注册 ───
+const shapeGenerators = { galaxy:generateGalaxy, blackhole:generateBlackhole, nebula:generateNebula, dna:generateDNA, earth:generateEarth, saturn:generateSaturn, solar:generateSolarSystem, crystal:generateCrystal, meteor:generateMeteor, tree:generateTree, heart:generateHeart };
+const shapeLabels = { galaxy:'✦ GALAXY', blackhole:'🕳️ BLACK HOLE', nebula:'🌌 NEBULA', dna:'🧬 DNA', earth:'🌍 EARTH', saturn:'🪐 SATURN', solar:'☀️ SOLAR SYSTEM', crystal:'💎 CRYSTAL', meteor:'☄️ METEOR SHOWER', tree:'🌳 TREE OF LIFE', heart:'❤️ HEART' };
 
 function switchShape(name) {
     shapeGenerators[name]();
@@ -476,7 +858,7 @@ const handData = {
 let currentShape = 'galaxy';
 let expansionFactor = 1.0, targetExpansion = 1.0;
 let rotationX = 0, rotationY = 0, targetRotX = 0, targetRotY = 0;
-let autoRotateSpeed = 0.001;
+let autoRotateSpeed = 0.003;
 let heartTransitionTimer = 0;
 let lastPinchTime = 0;
 
@@ -529,7 +911,7 @@ const hands = new Hands({ locateFile: f => {
     const mapped = f.replace('.tflite', '.bin');
     return `mediapipe/${mapped}`;
 }});
-hands.setOptions({ maxNumHands: 2, modelComplexity: 0, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+hands.setOptions({    maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.6, minTrackingConfidence: 0.5});
 
 hands.onResults(results => {
     handData.left.detected = false;
@@ -573,7 +955,7 @@ hands.onResults(results => {
 
             // Pinch (thumb+index)
             const dp = Math.sqrt((lm[8].x-lm[4].x)**2 + (lm[8].y-lm[4].y)**2 + (lm[8].z-lm[4].z)**2);
-            d.isPinching = dp < 0.05;
+            d.isPinching = dp < 0.05 && ext >= 3; // 捏合需要至少3根手指伸展（排除握拳）
         }
     } else if (inputActive) {
         statusEl.innerText = '🖱 使用鼠标/触摸控制';
@@ -592,12 +974,19 @@ const cameraUtils = new Camera(videoEl, {
 
 // 显式初始化 + 错误处理
 hands.initialize().then(() => {
-    setLoadProgress(50);
+    setLoadProgress(80);
     console.log('[Galaxy] MediaPipe Hands initialized');
+    // 初始化成功就隐藏加载页，不用等手势检测
+    if (loadScreen && !loadScreen.classList.contains('fade-out')) {
+        setLoadProgress(100);
+        loadScreen.classList.add('fade-out');
+        setTimeout(() => loadScreen.style.display = 'none', 800);
+    }
     return cameraUtils.start();
 }).then(() => {
-    setLoadProgress(60);
     console.log('[Galaxy] Camera started');
+    statusEl.innerText = '⏳ 等待手势...请将手伸到摄像头前';
+    statusEl.style.color = '#4ff';
 }).catch(err => {
     console.error('[Galaxy] Init error:', err);
     statusEl.innerText = '❌ 模型加载失败: ' + err.message;
@@ -630,7 +1019,11 @@ window.addEventListener('mouseup', () => { if (inputActive) pointerDown = false;
 window.addEventListener('touchstart', () => { if (inputActive) pointerDown = true; }, { passive: true });
 window.addEventListener('touchend', () => { if (inputActive) pointerDown = false; }, { passive: true });
 window.addEventListener('wheel', e => {
-    if (inputActive) { targetExpansion += e.deltaY > 0 ? -0.08 : 0.08; targetExpansion = Math.max(0.2, Math.min(2.5, targetExpansion)); }
+    // 滚轮控制远近（相机Z轴）
+    if (inputActive) {
+        camera.position.z += e.deltaY * 0.01;
+        camera.position.z = Math.max(8, Math.min(40, camera.position.z));
+    }
 });
 
 // ═══════════════════════════════════════════════
@@ -656,10 +1049,10 @@ function animate() {
             nextShape();
         }
 
-        if (dist < 0.5) {
+        if (dist < 0.25) {
             // Hands close → heart
             heartTransitionTimer++;
-            if (heartTransitionTimer > 15 && currentShape !== 'heart') {
+            if (heartTransitionTimer > 40 && currentShape !== 'heart') {
                 currentShape = 'heart'; switchShape('heart');
             }
             const midX = (handData.left.x + handData.right.x) / 2;
@@ -670,7 +1063,7 @@ function animate() {
             heartTransitionTimer = 0;
             if (currentShape === 'heart') { currentShape = SHAPES[currentShapeIndex]; switchShape(currentShape); }
             const dom = handData.right.detected ? handData.right : handData.left;
-            targetRotY = dom.x * 2; targetRotX = dom.y;
+            targetRotY = dom.x * 3; targetRotX = dom.y * 1.5;
             targetExpansion = dom.isOpen ? 1.5 : (dom.isFist ? 0.3 : 1.0);
         }
     } else if (inputActive) {
@@ -678,7 +1071,7 @@ function animate() {
             heartTransitionTimer = 0;
             currentShape = SHAPES[currentShapeIndex]; switchShape(currentShape);
         }
-        targetRotY = (pointerX - 0.5) * 3; targetRotX = (pointerY - 0.5) * 1.5;
+        targetRotY = (pointerX - 0.5) * 4; targetRotX = (pointerY - 0.5) * 2;
         targetExpansion = pointerDown ? Math.max(0.2, targetExpansion - 0.01) : Math.min(1.5, targetExpansion + 0.005);
     } else {
         const single = handData.left.detected ? handData.left : handData.right.detected ? handData.right : null;
@@ -707,24 +1100,76 @@ function animate() {
     const posArr = geometry.attributes.position.array;
     const colArr = geometry.attributes.color.array;
     const lerpSpd = currentShape === 'heart' ? 0.08 : 0.04;
+    const isMeteor = SHAPES[currentShapeIndex] === 'meteor';
 
     for (let i = 0; i < PARTICLE_COUNT; i++) {
         const ix = i*3, iy = i*3+1, iz = i*3+2;
-        const tx = targetPositions[ix] * expansionFactor;
-        const ty = targetPositions[iy] * expansionFactor;
-        const tz = targetPositions[iz] * expansionFactor;
-        const noise = Math.sin(time*0.8 + i*0.1) * 0.015;
+        if (!isMeteor) {
+            const tx = targetPositions[ix] * expansionFactor;
+            const ty = targetPositions[iy] * expansionFactor;
+            const tz = targetPositions[iz] * expansionFactor;
+            const noise = Math.sin(time*0.8 + i*0.1) * 0.015;
 
-        posArr[ix] += (tx - posArr[ix]) * lerpSpd + noise;
-        posArr[iy] += (ty - posArr[iy]) * lerpSpd;
-        posArr[iz] += (tz - posArr[iz]) * lerpSpd + noise;
+            posArr[ix] += (tx - posArr[ix]) * lerpSpd + noise;
+            posArr[iy] += (ty - posArr[iy]) * lerpSpd;
+            posArr[iz] += (tz - posArr[iz]) * lerpSpd + noise;
+        }
 
-        colArr[ix]   += (targetColors[ix]   - colArr[ix])   * 0.04;
-        colArr[iy]   += (targetColors[iy]   - colArr[iy])   * 0.04;
-        colArr[iz]   += (targetColors[iz]   - colArr[iz])   * 0.04;
+        if (!isMeteor) {
+            colArr[ix]   += (targetColors[ix]   - colArr[ix])   * 0.04;
+            colArr[iy]   += (targetColors[iy]   - colArr[iy])   * 0.04;
+            colArr[iz]   += (targetColors[iz]   - colArr[iz])   * 0.04;
+        }
     }
     geometry.attributes.position.needsUpdate = true;
     geometry.attributes.color.needsUpdate = true;
+
+    // ─── 爱心跳动动画 ───
+    if (SHAPES[currentShapeIndex] === 'heart') {
+        const beat = time * 4;
+        const beatPhase = beat % (Math.PI * 2);
+        const beatScale = beatPhase < 0.3 ? 1.0 + Math.sin(beatPhase / 0.3 * Math.PI) * 0.15 : 1.0;
+        expansionFactor = beatScale;
+        glow.material.opacity = 0.06 + Math.sin(beatPhase) * 0.04;
+    }
+
+    // ─── 陨石坠落动画 ───
+    if (SHAPES[currentShapeIndex] === 'meteor') {
+        const meteorSpeed = 0.15;
+        const resetY = 18;
+        const groundY = -16;
+        // 用手势控制方向
+        let driftX = 0, driftZ = 0;
+        if (handData.left.detected || handData.right.detected) {
+            const h = handData.left.detected ? handData.left : handData.right;
+            driftX = h.x * 0.3;
+            driftZ = (h.y - 0.5) * 0.2;
+        }
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+            const ix = i*3, iy = i*3+1, iz = i*3+2;
+            // 下落
+            posArr[iy] -= meteorSpeed;
+            posArr[ix] += driftX * 0.02;
+            posArr[iz] += driftZ * 0.02;
+            // 到达地面后重置到顶部
+            if (posArr[iy] < groundY) {
+                posArr[iy] = resetY + Math.random() * 5;
+                posArr[ix] = (Math.random()-0.5) * 30;
+                posArr[iz] = (Math.random()-0.5) * 30;
+            }
+            // 火焰颜色：越高越亮
+            const progress = 1 - (posArr[iy] - groundY) / (resetY - groundY);
+            // 渐变：白→黄→橙→红→暗红→灰
+            let cr, cg, cb;
+            if (progress < 0.15) { cr=1; cg=0.95; cb=0.9; }
+            else if (progress < 0.35) { const t=(progress-0.15)/0.2; cr=1; cg=0.95-t*0.45; cb=0.9-t*0.7; }
+            else if (progress < 0.55) { const t=(progress-0.35)/0.2; cr=1; cg=0.5-t*0.2; cb=0.2-t*0.15; }
+            else if (progress < 0.75) { const t=(progress-0.55)/0.2; cr=1-t*0.3; cg=0.3-t*0.15; cb=0.05; }
+            else if (progress < 0.9) { const t=(progress-0.75)/0.15; cr=0.7-t*0.4; cg=0.15-t*0.1; cb=0.05+t*0.05; }
+            else { cr=0.15+Math.random()*0.1; cg=0.08+Math.random()*0.05; cb=0.08; }
+            colArr[ix] = cr; colArr[iy] = cg; colArr[iz] = cb;
+        }
+    }
 
     // Glow
     glow.material.opacity = 0.04 + Math.sin(time*2) * 0.02;

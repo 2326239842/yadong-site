@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>yadongw - 欢迎加入人类进化</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft YaHei',sans-serif;overflow-x:hidden;line-height:1.7;background:linear-gradient(180deg,#0d0d1a,#1e1e3a 30%,#4f4f80 60%,#e8e8f5 90%,#fff);background-attachment:fixed}
+#fireworks{position:fixed;top:0;left:0;width:100%;height:100vh;pointer-events:none;z-index:1;transition:opacity .8s}#fireworks.hidden{opacity:0}
+nav{position:fixed;top:0;width:100%;height:60px;background:rgba(13,13,26,.92);backdrop-filter:blur(12px);display:flex;justify-content:center;align-items:center;gap:20px;z-index:1000;border-bottom:1px solid rgba(255,255,255,.08);flex-wrap:wrap;padding:0 10px}
+nav .brand{font-size:1.4rem;font-weight:700;background:linear-gradient(135deg,#00d4ff,#a855f7,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+nav a{color:rgba(255,255,255,.8);text-decoration:none;padding:8px 14px;border-radius:20px;font-size:.9rem;transition:.3s}
+nav a:hover{background:rgba(255,255,255,.12);color:#fff}
+.copy-btn{background:linear-gradient(135deg,#00d4ff,#a855f7);border:none;color:#fff;padding:6px 14px;border-radius:20px;font-size:.85rem;cursor:pointer;font-family:inherit;transition:.3s;white-space:nowrap}
+.copy-btn:hover{transform:scale(1.05);box-shadow:0 0 15px rgba(168,85,247,.4)}
+section{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;position:relative}
+.stitle{font-size:clamp(1.8rem,5vw,2.8rem);font-weight:800;text-align:center;margin-bottom:8px;background:linear-gradient(135deg,#00d4ff,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.ssub{color:rgba(255,255,255,.6);text-align:center;font-size:1rem;margin-bottom:40px}
+.hero{text-align:center}
+.hero h1{font-size:clamp(2.5rem,10vw,5rem);font-weight:900;background:linear-gradient(135deg,#00d4ff,#a855f7,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:15px;animation:glow 3s ease-in-out infinite alternate}
+@keyframes glow{from{text-shadow:0 0 20px rgba(0,212,255,.3)}to{text-shadow:0 0 40px rgba(168,85,247,.5)}}
+.hero p{font-size:1.2rem;color:rgba(255,255,255,.7);margin-bottom:30px}
+.scroll-hint{color:rgba(255,255,255,.4);font-size:2rem;animation:bounce 2s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(12px)}}
+
+/* 关于我 */
+#about{background:rgba(255,255,255,.03)}
+.about-wrap{display:flex;gap:40px;max-width:900px;align-items:center;flex-wrap:wrap;justify-content:center}
+.avatar{width:220px;height:220px;border-radius:50%;border:4px solid rgba(168,85,247,.4);object-fit:cover;box-shadow:0 0 40px rgba(168,85,247,.3);transition:.5s}
+.avatar:hover{transform:scale(1.08) rotate(3deg)}
+.about-txt{color:rgba(255,255,255,.85);font-size:1.05rem;line-height:2;max-width:500px}
+.stats{display:flex;gap:15px;margin-top:20px;flex-wrap:wrap}
+.stat{text-align:center;padding:15px 20px;background:rgba(255,255,255,.05);border-radius:14px;border:1px solid rgba(255,255,255,.08)}
+.stat b{font-size:1.6rem;background:linear-gradient(135deg,#00d4ff,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block}
+.stat small{color:rgba(255,255,255,.5);font-size:.8rem}
+
+/* 照片墙 */
+#photos{background:#fff;min-height:auto;padding:80px 20px}
+#photos .stitle{color:#1a1a3e}#photos .ssub{color:rgba(26,26,62,.6)}
+.gallery{display:flex;gap:20px;justify-content:center;align-items:center;max-width:1000px;flex-wrap:nowrap}
+.pcard{width:220px;height:160px;cursor:pointer;perspective:800px;flex-shrink:0;transition:transform .3s}
+.pcard:hover{transform:translateY(-8px)}
+.pcard.flipped{transform:translateY(-8px) scale(1.15);z-index:10}
+.pcard .inner{width:100%;height:100%;transition:transform .7s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d;position:relative}
+.pcard.flipped .inner{transform:rotateY(180deg)}
+.pcard .front,.pcard .back{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:12px;overflow:hidden;box-shadow:0 6px 25px rgba(0,0,0,.15)}
+.pcard .front{background:linear-gradient(135deg,#1a1a3e,#2a2a50);display:flex;align-items:center;justify-content:center;border:2px solid rgba(168,85,247,.3)}
+.pcard .front::after{content:'🃏';font-size:2.5rem;opacity:.5}
+.pcard .back{transform:rotateY(180deg)}
+.pcard .back img{width:100%;height:100%;object-fit:cover}
+/* 点击特效 - 粒子爆炸 */
+.sparkle{position:absolute;width:6px;height:6px;border-radius:50%;pointer-events:none;z-index:20;animation:sparkAnim .6s ease-out forwards}
+@keyframes sparkAnim{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(0)}}
+
+
+/* 兴趣 */
+#hobbies{background:rgba(255,255,255,.03)}
+.hgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;max-width:900px;width:100%}
+.hcard{background:rgba(255,255,255,.08);border-radius:18px;padding:25px;text-align:center;border:1px solid rgba(255,255,255,.1);transition:.4s}
+.hcard:hover{transform:translateY(-6px);box-shadow:0 15px 40px rgba(0,0,0,.2);background:rgba(255,255,255,.12)}
+.hcard .icon{font-size:2.5rem;margin-bottom:10px}
+.hcard h3{color:#fff;font-size:1.1rem;font-weight:700;margin-bottom:6px}
+.hcard p{color:rgba(255,255,255,.6);font-size:.9rem}
+
+/* 音乐 */
+.mplayer{margin-top:15px;display:flex;flex-direction:column;gap:10px;align-items:center}
+.mbtn{display:flex;align-items:center;gap:10px;padding:12px 22px;border-radius:50px;border:2px solid rgba(168,85,247,.4);background:rgba(168,85,247,.1);color:#fff;font-size:.95rem;cursor:pointer;transition:.3s;font-family:inherit;min-width:260px}
+.mbtn:hover{background:rgba(168,85,247,.25);transform:scale(1.02);border-color:#a855f7}
+.mbtn.on{background:linear-gradient(135deg,#a855f7,#ec4899);border-color:#ec4899;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(168,85,247,.4)}50%{box-shadow:0 0 0 10px rgba(168,85,247,0)}}
+.bars{display:flex;gap:2px;align-items:flex-end;height:16px}
+.bars span{width:3px;background:#fff;border-radius:2px}
+.mbtn.on .bars span{animation:bar .8s ease-in-out infinite}
+.mbtn.on .bars span:nth-child(1){animation-delay:0s}.mbtn.on .bars span:nth-child(2){animation-delay:.15s}.mbtn.on .bars span:nth-child(3){animation-delay:.3s}.mbtn.on .bars span:nth-child(4){animation-delay:.45s}
+@keyframes bar{0%,100%{height:4px}50%{height:16px}}
+
+/* 小人 */
+#works{background:rgba(255,255,255,.03)}
+.char-wrap{position:relative;width:260px;height:350px;cursor:pointer;user-select:none;margin:0 auto}
+.char{position:relative;width:100%;height:100%;transition:transform .3s}
+.char-head{width:90px;height:90px;background:linear-gradient(135deg,#ffecd2,#fcb69f);border-radius:50%;margin:0 auto;position:relative;z-index:2;box-shadow:0 5px 20px rgba(252,182,159,.4)}
+.char-face{position:absolute;top:0;left:0;width:100%;height:100%}
+.char-eye{position:absolute;top:32px;width:12px;height:14px;background:#2d2d2d;border-radius:50%}
+.char-eye.l{left:24px}.char-eye.r{right:24px}
+.char-eye::after{content:'';position:absolute;top:3px;right:2px;width:4px;height:4px;background:#fff;border-radius:50%}
+.char-blush{position:absolute;top:48px;width:16px;height:8px;background:rgba(255,150,150,.4);border-radius:50%}
+.char-blush.l{left:10px}.char-blush.r{right:10px}
+.char-smile{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);width:24px;height:12px;border-bottom:3px solid #2d2d2d;border-radius:0 0 12px 12px}
+.char-body-wrap{position:relative;margin:-8px auto 0;width:70px}
+.char-torso{width:70px;height:80px;background:linear-gradient(135deg,#00d4ff,#a855f7);border-radius:35px 35px 18px 18px;position:relative;z-index:1}
+.char-belly{position:absolute;top:20px;left:50%;transform:translateX(-50%);width:30px;height:30px;background:rgba(255,255,255,.2);border-radius:50%}
+.char-arm{position:absolute;top:8px;width:16px;height:50px;background:linear-gradient(180deg,#00d4ff,#a855f7);border-radius:10px;z-index:0;transition:transform .4s ease;transform-origin:top center}
+.char-arm.l{left:-10px;transform:rotate(12deg)}.char-arm.r{right:-10px;transform:rotate(-12deg)}
+.char-hand{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:14px;height:14px;background:#ffecd2;border-radius:50%}
+.char-legs{display:flex;justify-content:center;gap:10px;margin-top:-4px}
+.char-leg{width:16px;height:45px;background:linear-gradient(180deg,#a855f7,#6c5ce7);border-radius:0 0 8px 8px;transition:transform .3s}
+.char-foot{width:22px;height:10px;background:#6c5ce7;border-radius:0 0 6px 6px;margin:0 auto}
+.bubble{position:absolute;top:0;left:50%;transform:translateX(-50%) translateY(-100%);background:#fff;color:#1a1a3e;padding:10px 18px;border-radius:18px;font-size:.95rem;font-weight:600;white-space:nowrap;opacity:0;transition:.4s;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.12)}
+.bubble::after{content:'';position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#fff}
+.bubble.show{opacity:1;transform:translateX(-50%) translateY(-110%)}
+.char.jump .char-head{animation:jH .6s ease}.char.jump .char-torso{animation:jB .6s ease}
+@keyframes jH{0%,100%{transform:translateY(0)}50%{transform:translateY(-35px)}}
+@keyframes jB{0%,100%{transform:translateY(0)}50%{transform:translateY(-25px)}}
+.char.dance{animation:dan .8s ease}
+@keyframes dan{0%,100%{transform:rotate(0) translateY(0)}25%{transform:rotate(-8deg) translateY(-5px)}75%{transform:rotate(8deg) translateY(-5px)}}
+.char.spin{animation:spi .8s ease}
+@keyframes spi{0%{transform:rotateY(0)}100%{transform:rotateY(360deg)}}
+.char.wave .char-arm.r{animation:wA 1s ease}
+@keyframes wA{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(-55deg)}}
+.hint{color:rgba(255,255,255,.4);font-size:.85rem;margin-top:15px}
+
+/* 联系 */
+#contact{background:#fff;min-height:auto;padding:80px 20px}
+#contact .stitle{color:#1a1a3e}#contact .ssub{color:rgba(26,26,62,.6)}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;max-width:800px;width:100%}
+.citem{background:linear-gradient(135deg,rgba(0,212,255,.05),rgba(168,85,247,.05));padding:30px 20px;border-radius:18px;text-align:center;text-decoration:none;transition:.4s;border:1px solid rgba(0,0,0,.08);display:block}
+.citem:hover{transform:translateY(-6px);box-shadow:0 15px 40px rgba(0,0,0,.1);background:linear-gradient(135deg,rgba(0,212,255,.12),rgba(168,85,247,.12))}
+.citem .ci{font-size:2.2rem;margin-bottom:10px}
+.citem .cl{color:#666;font-size:.85rem;margin-bottom:4px}
+.citem .cv{color:#1a1a3e;font-size:1rem;font-weight:600}
+
+footer{text-align:center;padding:30px;background:#f8f8f8;color:#666;font-size:.9rem}
+footer a{color:#a855f7;text-decoration:none}
+
+.fi{opacity:0;transform:translateY(40px);transition:all .7s ease-out}.fi.v{opacity:1;transform:translateY(0)}
+.fb{position:fixed;top:80px;right:20px;width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#00d4ff,#a855f7);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.4rem;z-index:999;box-shadow:0 4px 20px rgba(168,85,247,.4);transition:.3s}.fb:hover{transform:scale(1.1)}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:2000;justify-content:center;align-items:center}.modal.on{display:flex}
+.modal-c{background:#fff;padding:35px;border-radius:20px;max-width:450px;width:90%;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal-c h3{font-size:1.4rem;color:#1a1a3e;margin-bottom:20px;text-align:center}
+.modal-c input,.modal-c textarea{width:100%;padding:12px 16px;margin-bottom:14px;border-radius:10px;border:2px solid rgba(0,0,0,.1);background:#f8f8f8;font-size:.95rem;font-family:inherit}
+.modal-c input:focus,.modal-c textarea:focus{border-color:#a855f7;outline:none}
+.modal-c textarea{min-height:100px;resize:vertical}
+.modal-c button{width:100%;padding:14px;border-radius:10px;border:none;background:linear-gradient(135deg,#00d4ff,#a855f7);color:#fff;font-size:1rem;font-weight:600;cursor:pointer}
+.modal-x{position:absolute;top:14px;right:20px;font-size:1.8rem;color:#999;cursor:pointer;background:none;border:none}
+
+@media(max-width:1100px){.gallery{gap:16px}.pcard{width:180px;height:240px}}
+@media(max-width:900px){.gallery{gap:12px}.pcard{width:150px;height:200px}.pcard .front .center-icon{font-size:2rem}.pcard .front .suit{font-size:1.5rem}.pcard .front .num{font-size:1.1rem}}
+@media(max-width:768px){nav{height:auto;padding:10px;gap:8px}nav a{padding:6px 10px;font-size:.8rem}.about-wrap{flex-direction:column;text-align:center}.avatar{width:160px;height:160px}.pcard{width:140px;height:200px}.stats{justify-content:center}.cgrid{grid-template-columns:1fr}}
+@media(max-width:480px){.pcard{width:120px;height:170px}.gallery{gap:10px}section{padding:60px 15px}}
+::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:#f0f0f0}::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#00d4ff,#a855f7);border-radius:4px}
+</style>
+</head>
+<body>
+<canvas id="fireworks"></canvas>
+<nav>
+<div class="brand">yadongw</div>
+<a href="#home">首页</a><a href="#about">关于我</a><a href="#photos">照片墙</a><a href="#hobbies">兴趣</a><a href="#works">作品</a><a href="#contact">联系</a><a href="galaxy/" target="_blank" style="color:#4ff">🌌 手势星系</a>
+<button class="copy-btn" onclick="navigator.clipboard.writeText('https://yadongw.dpdns.org').then(()=>{var t=document.createElement('span');t.textContent='✅ 已复制!';t.style.cssText='position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#a855f7;color:#fff;padding:8px 20px;border-radius:20px;font-size:.9rem;z-index:9999;pointer-events:none';document.body.appendChild(t);setTimeout(()=>t.remove(),2000)})">📋 复制网址</button>
+</nav>
+<button class="fb" onclick="document.getElementById('fm').classList.add('on')">💬</button>
+
+<section id="home" class="hero">
+<h1>yadongw</h1>
+<p>✨ 欢迎加入人类进化 · 用心创造，持续进化 ✨</p>
+<div class="scroll-hint">↓</div>
+</section>
+
+<section id="about">
+<h2 class="stitle fi">关于我</h2>
+<p class="ssub fi">认识一下屏幕这端的我</p>
+<div class="about-wrap fi">
+<img src="images/d6801a52d0cd1d9612e9387fdd65f1fe.jpg" alt="头像" class="avatar">
+<div class="about-txt">
+<p>👋 你好！我是 <strong>yadongw</strong>，一个对世界充满好奇的人。</p>
+<p style="margin-top:12px">喜欢探索新技术、创造有趣的东西。相信每一行代码、每一个创意都能让世界变得更好一点点。</p>
+<div class="stats">
+<div class="stat"><b>∞</b><small>好奇心</small></div>
+<div class="stat"><b>💡</b><small>创造力</small></div>
+<div class="stat"><b>🚀</b><small>行动力</small></div>
+</div>
+</div>
+</div>
+</section>
+
+<section id="photos">
+<h2 class="stitle fi">📷 照片墙</h2>
+<p class="ssub fi">翻转卡牌，发现精彩</p>
+<div class="gallery fi">
+<img src="images/1000078822.jpg" alt="照片1">
+<img src="images/微信图片_20260102215043_79_13.jpg" alt="照片2">
+<img src="images/IMG_1317.jpg" alt="照片3">
+</div>
+</section>
+
+<section id="hobbies">
+<h2 class="stitle fi">兴趣爱好</h2>
+<p class="ssub fi">让我心动的事物</p>
+<div class="hgrid">
+<div class="hcard fi"><div class="icon">💻</div><h3>编程创造</h3><p>用代码构建梦想，将想法变为现实</p></div>
+<div class="hcard fi">
+<div class="icon">🎵</div><h3>音乐欣赏</h3><p>让旋律抚慰心灵，感受节奏的力量</p>
+<div class="mplayer">
+<button class="mbtn" id="mb1" onclick="toggleM('a1','mb1')"><span>🎶</span><span>告白气球 - 周杰伦</span><span class="bars"><span></span><span></span><span></span><span></span></span></button>
+<button class="mbtn" id="mb2" onclick="toggleM('a2','mb2')"><span>🎶</span><span>迷失幻境 - 王忻辰</span><span class="bars"><span></span><span></span><span></span><span></span></span></button>
+</div>
+</div>
+<div class="hcard fi"><div class="icon">📷</div><h3>摄影记录</h3><p>用镜头捕捉生活中转瞬即逝的美好</p></div>
+<div class="hcard fi"><div class="icon">🎮</div><h3>游戏探索</h3><p>在虚拟世界中体验不同的冒险与故事</p></div>
+<div class="hcard fi"><div class="icon">📚</div><h3>阅读思考</h3><p>在书页间与智者对话，拓展思维边界</p></div>
+<div class="hcard fi"><div class="icon">🌍</div><h3>旅行探索</h3><p>走出去看看世界的广阔与精彩</p></div>
+</div>
+</section>
+
+<section id="works">
+<h2 class="stitle fi">作品展示</h2>
+<p class="ssub fi">点击小人，和TA互动吧！</p>
+<div class="char-wrap fi" onclick="interact()">
+<div class="bubble" id="bub">你好呀！👋</div>
+<div class="char" id="ch">
+<div class="char-head"><div class="char-face">
+<div class="char-eye l"></div><div class="char-eye r"></div>
+<div class="char-blush l"></div><div class="char-blush r"></div>
+<div class="char-smile"></div>
+</div></div>
+<div class="char-body-wrap">
+<div class="char-arm l"><div class="char-hand"></div></div>
+<div class="char-torso"><div class="char-belly"></div></div>
+<div class="char-arm r"><div class="char-hand"></div></div>
+</div>
+<div class="char-legs"><div><div class="char-leg"></div><div class="char-foot"></div></div><div><div class="char-leg"></div><div class="char-foot"></div></div></div>
+</div>
+</div>
+<p class="hint fi">👆 点击小人试试看</p>
+</section>
+
+<section id="contact">
+<h2 class="stitle fi">联系方式</h2>
+<p class="ssub fi">期待与你建立连接</p>
+<div class="cgrid">
+<a href="mailto:wyd2326239842@outlook.com" class="citem fi"><div class="ci">📧</div><div class="cl">电子邮箱</div><div class="cv">wyd2326239842@outlook.com</div></a>
+<a href="https://yadongw.dpdns.org" target="_blank" class="citem fi"><div class="ci">🌐</div><div class="cl">个人网站</div><div class="cv">yadongw.dpdns.org</div></a>
+<a href="https://github.com/2326239842" target="_blank" class="citem fi"><div class="ci">💻</div><div class="cl">GitHub</div><div class="cv">github.com/2326239842</div></a>
+</div>
+</section>
+
+<footer>© 2026 yadongw · 用心创造，持续进化 · <a href="https://yadongw.dpdns.org">yadongw.dpdns.org</a></footer>
+
+<div class="modal" id="fm"><div class="modal-c">
+<button class="modal-x" onclick="document.getElementById('fm').classList.remove('on')">×</button>
+<h3>💡 意见反馈</h3>
+<input placeholder="您的称呼" id="fn"><input placeholder="您的邮箱（选填）" id="fe">
+<textarea placeholder="请写下您的建议或想法..." id="fc"></textarea>
+<button onclick="if(!document.getElementById('fc').value.trim()){alert('请输入内容');return}alert('感谢反馈！🙏');document.getElementById('fm').classList.remove('on');document.getElementById('fn').value='';document.getElementById('fe').value='';document.getElementById('fc').value=''">提交反馈</button>
+</div></div>
+
+<audio id="a1" src="music/告白气球-周杰伦.mp3"></audio>
+<audio id="a2" src="music/迷失幻境-IN-K_王忻辰.mp3"></audio>
+
+<script>
+const c=document.getElementById('fireworks'),x=c.getContext('2d');
+c.width=innerWidth;c.height=innerHeight;
+class F{constructor(){this.x=Math.random()*c.width;this.y=c.height;this.ty=Math.random()*(c.height*.5)+80;this.sp=1.5+Math.random()*1.5;this.ps=[];this.ex=false;this.h=Math.random()*60+180}
+update(){if(!this.ex){this.y-=this.sp;if(this.y<=this.ty)this.explode()}this.ps.forEach((p,i)=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.025;p.a-=.01;if(p.a<=0)this.ps.splice(i,1)})}
+explode(){this.ex=true;for(let i=0;i<30;i++){const a=(Math.PI*2/30)*i,s=1+Math.random()*1.5;this.ps.push({x:this.x,y:this.y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,a:1,h:this.h+Math.random()*30})}}
+draw(){if(!this.ex){x.beginPath();x.arc(this.x,this.y,2,0,Math.PI*2);x.fillStyle=`hsl(${this.h},80%,70%)`;x.fill()}this.ps.forEach(p=>{x.beginPath();x.arc(p.x,p.y,1.5,0,Math.PI*2);x.fillStyle=`hsl(${p.h},80%,65%)`;x.globalAlpha=p.a;x.fill();x.globalAlpha=1})}}
+let fs=[],fa=true;
+function anim(){if(!fa){requestAnimationFrame(anim);return}x.fillStyle='rgba(13,13,26,.12)';x.fillRect(0,0,c.width,c.height);if(Math.random()<.04)fs.push(new F());fs.forEach((f,i)=>{f.update();f.draw();if(f.ps.length===0&&f.ex)fs.splice(i,1)});requestAnimationFrame(anim)}
+anim();
+window.addEventListener('scroll',()=>{if(scrollY>innerHeight*.4){c.classList.add('hidden');fa=false}else{c.classList.remove('hidden');fa=true}});
+window.addEventListener('resize',()=>{c.width=innerWidth;c.height=innerHeight});
+const o=new IntersectionObserver(e=>{e.forEach(t=>{if(t.isIntersecting)t.target.classList.add('v')})},{threshold:.1});
+document.querySelectorAll('.fi').forEach(el=>o.observe(el));
+let cm=null,cb=null;
+function toggleM(id,bid){const a=document.getElementById(id),b=document.getElementById(bid);if(cm&&cm!==a){cm.pause();cm.currentTime=0;cb.classList.remove('on')}if(a.paused){a.play();b.classList.add('on');cm=a;cb=b}else{a.pause();b.classList.remove('on');cm=null;cb=null}}
+const ph=['你好呀！👋','今天也要加油！💪','来聊天吧！😊','我是你的小助手~🤖','摸摸头～','哈哈哈！🎉','想听故事吗？📖','一起去冒险吧！🌟','休息一下～☕','我超厉害的！✨','你真棒！👏','给我讲个笑话吧！😄'];
+const ac=['jump','dance','spin','wave'];let la='';
+function interact(){const ch=document.getElementById('ch'),b=document.getElementById('bub');let a;do{a=ac[Math.floor(Math.random()*ac.length)]}while(a===la);la=a;ch.className='char '+a;b.textContent=ph[Math.floor(Math.random()*ph.length)];b.classList.add('show');setTimeout(()=>{ch.className='char';b.classList.remove('show')},2000)}
+document.getElementById('fm').addEventListener('click',function(e){if(e.target===this)this.classList.remove('on')});
+document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',function(e){e.preventDefault();document.querySelector(this.getAttribute('href')).scrollIntoView({behavior:'smooth'})})});
+
+function flipCard(card,e){
+card.classList.toggle('flipped');
+var rect=card.getBoundingClientRect();
+var cx=e.clientX-rect.left;
+var cy=e.clientY-rect.top;
+var colors=['#a855f7','#00d4ff','#ec4899','#ffd93d','#00ff88'];
+for(var i=0;i<12;i++){
+var sp=document.createElement('div');
+sp.className='sparkle';
+var a=(Math.PI*2/12)*i;
+var d=30+Math.random()*25;
+sp.style.cssText='left:'+cx+'px;top:'+cy+'px;background:'+colors[i%5]+';--tx:'+Math.cos(a)*d+'px;--ty:'+Math.sin(a)*d+'px';
+card.appendChild(sp);
+setTimeout(function(){sp.remove()},700);
+}
+}
+</script>
+</body>
+</html>

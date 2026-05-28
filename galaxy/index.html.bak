@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>手势星系 — Gesture Galaxy</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { overflow: hidden; background: #000; font-family: 'Segoe UI', system-ui, sans-serif; touch-action: none; }
+        canvas { display: block; }
+
+        /* ─── Loading Screen ─── */
+        #loading-screen {
+            position: fixed; inset: 0; z-index: 999;
+            background: #000; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            transition: opacity 0.8s;
+        }
+        #loading-screen.fade-out { opacity: 0; pointer-events: none; }
+        #loading-screen .spinner {
+            width: 60px; height: 60px; border-radius: 50%;
+            border: 2px solid rgba(100,200,255,0.1);
+            border-top-color: #4ff;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #loading-screen .load-text {
+            margin-top: 20px; color: rgba(100,200,255,0.6);
+            font-size: 0.85rem; letter-spacing: 2px;
+        }
+        #loading-screen .load-progress {
+            margin-top: 10px; width: 180px; height: 2px;
+            background: rgba(255,255,255,0.05); border-radius: 1px;
+            overflow: hidden;
+        }
+        #loading-screen .load-progress-bar {
+            height: 100%; width: 0%; background: #4ff;
+            transition: width 0.3s;
+        }
+
+        /* ─── UI Panel ─── */
+        #ui {
+            position: fixed; top: env(safe-area-inset-top, 12px); left: env(safe-area-inset-left, 12px);
+            z-index: 10; pointer-events: none; user-select: none;
+            padding: 12px 16px;
+            max-width: 280px;
+        }
+        #ui h1 {
+            font-size: clamp(1rem, 3vw, 1.4rem); color: #fff; font-weight: 300;
+            text-shadow: 0 0 20px rgba(100,150,255,0.5); letter-spacing: 2px;
+        }
+        .instructions { margin-top: 10px; display: flex; flex-direction: column; gap: 5px; }
+        .inst {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: clamp(0.65rem, 1.8vw, 0.8rem); color: rgba(255,255,255,0.45);
+            background: rgba(255,255,255,0.04); padding: 3px 8px; border-radius: 4px;
+            border-left: 2px solid rgba(100,200,255,0.25);
+        }
+        .inst .emoji { font-size: 1rem; }
+        #status {
+            margin-top: 8px; font-size: clamp(0.6rem, 1.5vw, 0.75rem);
+            color: #f55; letter-spacing: 1px; transition: color 0.5s;
+        }
+
+        /* ─── Shape label (center bottom) ─── */
+        #shape-label {
+            position: fixed; bottom: clamp(60px, 10vh, 100px); left: 50%; transform: translateX(-50%);
+            font-size: clamp(1.2rem, 4vw, 2.2rem); color: rgba(255,255,255,0.13);
+            letter-spacing: 6px; text-transform: uppercase;
+            pointer-events: none; z-index: 10; transition: opacity 0.6s;
+            white-space: nowrap;
+        }
+
+        /* ─── Shape selector bar ─── */
+        #shape-bar {
+            position: fixed; bottom: clamp(16px, 3vh, 30px); left: 50%; transform: translateX(-50%);
+            display: flex; gap: 8px; z-index: 10;
+        }
+        .shape-btn {
+            width: clamp(32px, 6vw, 44px); height: clamp(32px, 6vw, 44px);
+            border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.4);
+            font-size: clamp(0.8rem, 2vw, 1.1rem); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s; pointer-events: auto;
+        }
+        .shape-btn:hover { border-color: rgba(100,200,255,0.4); background: rgba(100,200,255,0.08); }
+        .shape-btn.active {
+            border-color: #4ff; color: #fff;
+            background: rgba(68,255,255,0.12);
+            box-shadow: 0 0 12px rgba(68,255,255,0.3);
+        }
+
+        /* ─── Hand indicators ─── */
+        #hand-indicators {
+            position: fixed; top: env(safe-area-inset-top, 12px); right: env(safe-area-inset-right, 12px);
+            display: flex; gap: 8px; z-index: 10;
+        }
+        .hand-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: #333; transition: all 0.3s;
+        }
+        .hand-dot.active {
+            background: #4ff;
+            box-shadow: 0 0 8px #4ff, 0 0 16px rgba(68,255,255,0.3);
+        }
+
+        /* ─── Video preview ─── */
+        #video-preview {
+            position: fixed; bottom: 10px; left: 10px;
+            width: clamp(100px, 20vw, 160px); aspect-ratio: 4/3;
+            border: 1px solid rgba(255,255,255,0.08); border-radius: 6px;
+            overflow: hidden; z-index: 10; opacity: 0.5;
+            transform: scaleX(-1);
+        }
+        #video-preview video { width: 100%; height: 100%; object-fit: cover; }
+
+        /* ─── Mobile: hide video preview, compact UI ─── */
+        @media (max-width: 600px) {
+            #video-preview { display: none; }
+            .inst .label { display: none; }
+            #ui { padding: 8px 10px; max-width: 200px; }
+            .inst { padding: 2px 6px; }
+            #shape-bar { gap: 6px; }
+        }
+        @media (max-width: 380px) {
+            #ui .instructions { display: none; }
+        }
+
+        /* ─── Landscape phone: shift UI up ─── */
+        @media (max-height: 500px) and (orientation: landscape) {
+            #ui { top: 6px; }
+            .instructions { display: none; }
+            #shape-bar { bottom: 8px; }
+        }
+    </style>
+
+    <!-- 本地自托管，避免国内访问 jsdelivr/cdnflare 超时 -->
+    <link rel="preload" href="mediapipe/hands_solution_simd_wasm_bin.wasm" as="fetch" crossorigin>
+    <link rel="preload" href="mediapipe/hands_solution_packed_assets.data" as="fetch" crossorigin>
+    <link rel="preload" href="mediapipe/hand_landmark_lite.bin" as="fetch" crossorigin>
+    <script src="mediapipe/three.min.js"></script>
+    <script src="mediapipe/camera_utils.js"></script>
+    <script src="mediapipe/hands.js"></script>
+</head>
+<body>
+
+    <div id="loading-screen">
+        <div class="spinner"></div>
+        <div class="load-text">加载手势模型中...</div>
+        <div class="load-progress"><div class="load-progress-bar" id="load-bar"></div></div>
+    </div>
+
+    <div id="ui">
+        <h1>✦ GESTURE GALAXY</h1>
+        <div class="instructions">
+            <div class="inst"><span class="emoji">🖐</span> <span class="label">移动 → 旋转</span></div>
+            <div class="inst"><span class="emoji">✊✋</span> <span class="label">握拳/张开 → 缩放</span></div>
+            <div class="inst"><span class="emoji">👌</span> <span class="label">捏合 → 切换形态</span></div>
+            <div class="inst"><span class="emoji">🤲</span> <span class="label">双手靠近 → 爱心</span></div>
+            <div class="inst"><span class="emoji">🖱</span> <span class="label">鼠标/触摸 (无摄像头)</span></div>
+        </div>
+        <div id="status">⏳ 正在加载手势模型...</div>
+    </div>
+
+    <div id="shape-label"></div>
+
+    <div id="shape-bar">
+        <button class="shape-btn active" data-shape="galaxy" title="星系">✦</button>
+        <button class="shape-btn" data-shape="earth" title="地球">🌍</button>
+        <button class="shape-btn" data-shape="saturn" title="土星">🪐</button>
+        <button class="shape-btn" data-shape="solar" title="太阳系">☀️</button>
+        <button class="shape-btn" data-shape="heart" title="爱心">❤️</button>
+    </div>
+
+    <div id="hand-indicators">
+        <div class="hand-dot" id="hand-L" title="左手"></div>
+        <div class="hand-dot" id="hand-R" title="右手"></div>
+    </div>
+
+    <div id="video-preview">
+        <video id="input-video" playsinline></video>
+    </div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════
+const PARTICLE_COUNT = 14000;
+const GALAXY_RADIUS = 14;
+const GALAXY_ARMS = 4;
+const GALAXY_TWIST = 2.5;
+
+const SHAPES = ['galaxy', 'earth', 'saturn', 'solar', 'heart'];
+let currentShapeIndex = 0;
+
+// ═══════════════════════════════════════════════
+//  THREE.JS SCENE
+// ═══════════════════════════════════════════════
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x000005, 0.006);
+
+const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 500);
+camera.position.set(0, 8, 24);
+camera.lookAt(0, 0, 0);
+
+const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+renderer.setClearColor(0x000005);
+document.body.appendChild(renderer.domElement);
+
+// ═══════════════════════════════════════════════
+//  PARTICLE SYSTEM
+// ═══════════════════════════════════════════════
+const geometry = new THREE.BufferGeometry();
+const positions = new Float32Array(PARTICLE_COUNT * 3);
+const targetPositions = new Float32Array(PARTICLE_COUNT * 3);
+const colors = new Float32Array(PARTICLE_COUNT * 3);
+const targetColors = new Float32Array(PARTICLE_COUNT * 3);
+
+// Scatter start positions
+for (let i = 0; i < PARTICLE_COUNT * 3; i++) {
+    positions[i] = (Math.random() - 0.5) * 80;
+    targetPositions[i] = positions[i];
+}
+
+geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+// Sprite
+const spriteCanvas = document.createElement('canvas');
+spriteCanvas.width = 64; spriteCanvas.height = 64;
+const sCtx = spriteCanvas.getContext('2d');
+const sGrad = sCtx.createRadialGradient(32, 32, 0, 32, 32, 32);
+sGrad.addColorStop(0, 'rgba(255,255,255,1)');
+sGrad.addColorStop(0.15, 'rgba(255,255,255,0.8)');
+sGrad.addColorStop(0.4, 'rgba(255,255,255,0.15)');
+sGrad.addColorStop(1, 'rgba(0,0,0,0)');
+sCtx.fillStyle = sGrad;
+sCtx.fillRect(0, 0, 64, 64);
+const spriteTex = new THREE.Texture(spriteCanvas);
+spriteTex.needsUpdate = true;
+
+const material = new THREE.PointsMaterial({
+    size: 0.5, vertexColors: true, map: spriteTex,
+    blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.9
+});
+
+const particleSystem = new THREE.Points(geometry, material);
+scene.add(particleSystem);
+
+// Central glow
+const glow = new THREE.Mesh(
+    new THREE.SphereGeometry(1.5, 16, 16),
+    new THREE.MeshBasicMaterial({ color: 0x6688ff, transparent: true, opacity: 0.06, blending: THREE.AdditiveBlending, depthWrite: false })
+);
+scene.add(glow);
+
+// ═══════════════════════════════════════════════
+//  SHAPE GENERATORS
+// ═══════════════════════════════════════════════
+
+function generateGalaxy() {
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const armIdx = Math.floor(Math.random() * GALAXY_ARMS);
+        const armAngle = (armIdx / GALAXY_ARMS) * Math.PI * 2;
+        const r = Math.pow(Math.random(), 0.6) * GALAXY_RADIUS;
+        const twist = r * GALAXY_TWIST / GALAXY_RADIUS;
+        const angle = armAngle + twist + (Math.random() - 0.5) * 1.2;
+        const scatter = (Math.random() - 0.5) * (r * 0.15 + 0.5);
+        const x = Math.cos(angle) * r + scatter;
+        const z = Math.sin(angle) * r + scatter;
+        const y = (Math.random() - 0.5) * (1.5 - r * 0.06) * Math.exp(-r * 0.15);
+
+        targetPositions[i*3] = x; targetPositions[i*3+1] = y; targetPositions[i*3+2] = z;
+
+        const dr = r / GALAXY_RADIUS;
+        let cr, cg, cb;
+        if (dr < 0.2)      { cr = 0.7+Math.random()*0.3; cg = 0.8+Math.random()*0.2; cb = 1.0; }
+        else if (dr < 0.6) { cr = 0.9+Math.random()*0.1; cg = 0.6+Math.random()*0.3; cb = 0.2+Math.random()*0.2; }
+        else               { cr = 0.6+Math.random()*0.3; cg = 0.2+Math.random()*0.2; cb = 0.1+Math.random()*0.1; }
+        if (Math.random() < 0.05) { cr = 0.3; cg = 0.5; cb = 1.0; }
+
+        targetColors[i*3] = cr; targetColors[i*3+1] = cg; targetColors[i*3+2] = cb;
+    }
+}
+
+function generateEarth() {
+    const R = 10;
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+        // Sphere surface distribution with some depth
+        const phi = Math.acos(1 - 2 * (i + 0.5) / PARTICLE_COUNT);
+        const theta = Math.sqrt(PARTICLE_COUNT * Math.PI) * phi;
+        const jitter = (Math.random() - 0.5) * 0.4;
+
+        const x = (R + jitter) * Math.sin(phi) * Math.cos(theta);
+        const y = (R + jitter) * Math.cos(phi);
+        const z = (R + jitter) * Math.sin(phi) * Math.sin(theta);
+
+        targetPositions[i*3] = x; targetPositions[i*3+1] = y; targetPositions[i*3+2] = z;
+
+        // Color: simulate land/ocean with noise
+        const nx = Math.sin(phi) * Math.cos(theta);
+        const ny = Math.cos(phi);
+        const nz = Math.sin(phi) * Math.sin(theta);
+        // Simple pseudo-noise for continents
+        const noise = Math.sin(nx * 5 + 1.3) * Math.cos(nz * 4 + 0.7) * Math.sin(ny * 6 + 2.1);
+        const polar = Math.abs(ny);
+
+        let cr, cg, cb;
+        if (polar > 0.82) {
+            // Ice caps — white/blue
+            cr = 0.85 + Math.random()*0.15; cg = 0.9 + Math.random()*0.1; cb = 1.0;
+        } else if (noise > 0.15) {
+            // Land — green/brown
+            const landType = Math.random();
+            if (landType < 0.5) { cr = 0.15; cg = 0.45 + Math.random()*0.2; cb = 0.1; } // forest
+            else if (landType < 0.8) { cr = 0.55+Math.random()*0.2; cg = 0.4; cb = 0.2; } // desert
+            else { cr = 0.3; cg = 0.5; cb = 0.15; } // grassland
+        } else if (noise > -0.1) {
+            // Coast / shallow — light blue
+            cr = 0.1; cg = 0.4 + Math.random()*0.2; cb = 0.7;
+        } else {
+            // Ocean — deep blue
+            cr = 0.02 + Math.random()*0.05; cg = 0.1 + Math.random()*0.15; cb = 0.4 + Math.random()*0.25;
+        }
+        targetColors[i*3] = cr; targetColors[i*3+1] = cg; targetColors[i*3+2] = cb;
+    }
+}
+
+function generateSaturn() {
+    const planetR = 6;
+    const ringInner = 9, ringOuter = 14;
+    const planetCount = Math.floor(PARTICLE_COUNT * 0.45);
+    const ringCount = PARTICLE_COUNT - planetCount;
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+        if (i < planetCount) {
+            // Planet body
+            const phi = Math.acos(1 - 2 * (i + 0.5) / planetCount);
+            const theta = Math.sqrt(planetCount * Math.PI) * phi;
+            const jitter = (Math.random() - 0.5) * 0.3;
+            const x = (planetR + jitter) * Math.sin(phi) * Math.cos(theta);
+            const y = (planetR + jitter) * Math.cos(phi);
+            const z = (planetR + jitter) * Math.sin(phi) * Math.sin(theta);
+            targetPositions[i*3] = x; targetPositions[i*3+1] = y; targetPositions[i*3+2] = z;
+
+            // Bands: horizontal stripes
+            const band = Math.sin(phi * 8);
+            if (band > 0.3) { targetColors[i*3]=0.85; targetColors[i*3+1]=0.72; targetColors[i*3+2]=0.45; }
+            else if (band > -0.3) { targetColors[i*3]=0.75; targetColors[i*3+1]=0.62; targetColors[i*3+2]=0.38; }
+            else { targetColors[i*3]=0.65; targetColors[i*3+1]=0.55; targetColors[i*3+2]=0.35; }
+        } else {
+            // Ring
+            const ri = i - planetCount;
+            const angle = (ri / ringCount) * Math.PI * 2 * 8;
+            const radius = ringInner + Math.random() * (ringOuter - ringInner);
+            const x = radius * Math.cos(angle);
+            const z = radius * Math.sin(angle);
+            const y = (Math.random() - 0.5) * 0.3; // thin ring
+            targetPositions[i*3] = x; targetPositions[i*3+1] = y; targetPositions[i*3+2] = z;
+
+            // Ring color: mix of icy particles
+            const t = (radius - ringInner) / (ringOuter - ringInner);
+            targetColors[i*3] = 0.6 + t * 0.3;
+            targetColors[i*3+1] = 0.55 + t * 0.3;
+            targetColors[i*3+2] = 0.5 + t * 0.35;
+        }
+    }
+}
+
+function generateSolarSystem() {
+    const sunR = 2.5;
+    const planets = [
+        { name:'Mercury', r:3.5,  count:200,  color:[0.7,0.6,0.5] },
+        { name:'Venus',   r:5,    count:300,  color:[0.9,0.7,0.3] },
+        { name:'Earth',   r:7,    count:500,  color:[0.2,0.5,0.9] },
+        { name:'Mars',    r:9,    count:350,  color:[0.8,0.3,0.15] },
+        { name:'Jupiter', r:12,   count:1200, color:[0.8,0.65,0.4] },
+        { name:'Saturn',  r:16,   count:900,  color:[0.85,0.72,0.45] },
+        { name:'Uranus',  r:20,   count:600,  color:[0.5,0.8,0.85] },
+        { name:'Neptune', r:24,   count:550,  color:[0.2,0.3,0.85] },
+    ];
+    const totalPlanetP = planets.reduce((s,p) => s + p.count, 0);
+    const sunCount = PARTICLE_COUNT - totalPlanetP;
+
+    let idx = 0;
+
+    // Sun
+    for (let i = 0; i < sunCount; i++) {
+        const phi = Math.acos(1 - 2*(i+0.5)/sunCount);
+        const theta = Math.sqrt(sunCount * Math.PI) * phi;
+        const j = (Math.random()-0.5)*0.3;
+        targetPositions[idx*3] = (sunR+j)*Math.sin(phi)*Math.cos(theta);
+        targetPositions[idx*3+1] = (sunR+j)*Math.cos(phi);
+        targetPositions[idx*3+2] = (sunR+j)*Math.sin(phi)*Math.sin(theta);
+        const bright = 0.8 + Math.random()*0.2;
+        targetColors[idx*3] = bright; targetColors[idx*3+1] = bright*0.7; targetColors[idx*3+2] = bright*0.2;
+        idx++;
+    }
+
+    // Planets
+    for (const p of planets) {
+        for (let i = 0; i < p.count; i++) {
+            const angle = (i / p.count) * Math.PI * 2 + Math.random() * 0.3;
+            const radius = p.r + (Math.random()-0.5)*0.4;
+            const y = (Math.random()-0.5)*0.3;
+            targetPositions[idx*3] = radius * Math.cos(angle);
+            targetPositions[idx*3+1] = y;
+            targetPositions[idx*3+2] = radius * Math.sin(angle);
+            const v = 0.8 + Math.random()*0.2;
+            targetColors[idx*3] = p.color[0]*v; targetColors[idx*3+1] = p.color[1]*v; targetColors[idx*3+2] = p.color[2]*v;
+            idx++;
+        }
+    }
+    // Fill remaining with asteroid belt / dust
+    while (idx < PARTICLE_COUNT) {
+        const a = Math.random() * Math.PI * 2;
+        const r = 10 + Math.random() * 1.5;
+        targetPositions[idx*3] = r*Math.cos(a);
+        targetPositions[idx*3+1] = (Math.random()-0.5)*0.5;
+        targetPositions[idx*3+2] = r*Math.sin(a);
+        targetColors[idx*3]=0.4; targetColors[idx*3+1]=0.35; targetColors[idx*3+2]=0.3;
+        idx++;
+    }
+}
+
+function generateHeart() {
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const t = (i / PARTICLE_COUNT) * Math.PI * 2;
+        const hx = 16 * Math.pow(Math.sin(t), 3);
+        const hy = 13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t);
+        const fillR = Math.pow(Math.random(), 0.5);
+        const scale = 0.5;
+        targetPositions[i*3] = hx*scale*fillR + (Math.random()-0.5)*0.5;
+        targetPositions[i*3+1] = hy*scale*fillR + (Math.random()-0.5)*0.5;
+        targetPositions[i*3+2] = (Math.random()-0.5)*3*fillR;
+        const brightness = 0.5 + fillR*0.5;
+        targetColors[i*3] = brightness; targetColors[i*3+1] = 0.05+Math.random()*0.15; targetColors[i*3+2] = 0.1+Math.random()*0.2;
+    }
+}
+
+// Shape registry
+const shapeGenerators = { galaxy: generateGalaxy, earth: generateEarth, saturn: generateSaturn, solar: generateSolarSystem, heart: generateHeart };
+const shapeLabels = { galaxy: '✦ GALAXY', earth: '🌍 EARTH', saturn: '🪐 SATURN', solar: '☀️ SOLAR SYSTEM', heart: '❤️ HEART' };
+
+function switchShape(name) {
+    shapeGenerators[name]();
+    currentShapeIndex = SHAPES.indexOf(name);
+    updateShapeButtons();
+    showLabel(shapeLabels[name]);
+}
+function nextShape() {
+    currentShapeIndex = (currentShapeIndex + 1) % SHAPES.length;
+    switchShape(SHAPES[currentShapeIndex]);
+}
+
+// Init
+generateGalaxy();
+updateColorsImmediate();
+
+function updateColorsImmediate() {
+    for (let i = 0; i < PARTICLE_COUNT * 3; i++) colors[i] = targetColors[i];
+    geometry.attributes.color.needsUpdate = true;
+}
+
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+const handData = {
+    left:  { x:0.5, y:0.5, detected:false, isOpen:false, isFist:false, isPinching:false },
+    right: { x:0.5, y:0.5, detected:false, isOpen:false, isFist:false, isPinching:false }
+};
+
+let currentShape = 'galaxy';
+let expansionFactor = 1.0, targetExpansion = 1.0;
+let rotationX = 0, rotationY = 0, targetRotX = 0, targetRotY = 0;
+let autoRotateSpeed = 0.001;
+let heartTransitionTimer = 0;
+let lastPinchTime = 0;
+
+// Mouse/touch fallback
+let inputActive = true;
+let pointerX = 0.5, pointerY = 0.5;
+let pointerDown = false;
+
+const statusEl = document.getElementById('status');
+const shapeLabelEl = document.getElementById('shape-label');
+const handLDot = document.getElementById('hand-L');
+const handRDot = document.getElementById('hand-R');
+
+// Shape bar buttons
+document.querySelectorAll('.shape-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchShape(btn.dataset.shape));
+});
+function updateShapeButtons() {
+    document.querySelectorAll('.shape-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.shape === SHAPES[currentShapeIndex]);
+    });
+}
+
+// ═══════════════════════════════════════════════
+//  MEDIAPIPE HANDS
+// ═══════════════════════════════════════════════
+const videoEl = document.getElementById('input-video');
+
+// Loading progress tracking
+const loadBar = document.getElementById('load-bar');
+const loadScreen = document.getElementById('loading-screen');
+let loadProgress = 0;
+function setLoadProgress(p) {
+    loadProgress = Math.max(loadProgress, p);
+    if (loadBar) loadBar.style.width = loadProgress + '%';
+}
+// Track fetch requests for progress
+const origFetch = window.fetch;
+window.fetch = function(...args) {
+    const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || '';
+    if (url.includes('.wasm')) setLoadProgress(40);
+    else if (url.includes('.data')) setLoadProgress(70);
+    else if (url.includes('.binarypb')) setLoadProgress(90);
+    return origFetch.apply(this, args);
+};
+setLoadProgress(10);
+
+const hands = new Hands({ locateFile: f => {
+    // Cloudflare Pages 不识别 .tflite 扩展名，重命名为 .bin
+    const mapped = f.replace('.tflite', '.bin');
+    return `mediapipe/${mapped}`;
+}});
+hands.setOptions({ maxNumHands: 2, modelComplexity: 0, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+
+hands.onResults(results => {
+    handData.left.detected = false;
+    handData.right.detected = false;
+    handLDot.classList.remove('active');
+    handRDot.classList.remove('active');
+
+    if (results.multiHandLandmarks?.length > 0) {
+        inputActive = false;
+        statusEl.innerText = '✅ 手势追踪已激活';
+        statusEl.style.color = '#4f4';
+        // First result → hide loading screen
+        if (loadScreen && !loadScreen.classList.contains('fade-out')) {
+            setLoadProgress(100);
+            loadScreen.classList.add('fade-out');
+            setTimeout(() => loadScreen.style.display = 'none', 800);
+        }
+
+        for (let i = 0; i < results.multiHandLandmarks.length; i++) {
+            const lm = results.multiHandLandmarks[i];
+            const label = results.multiHandedness[i].label;
+            const side = label === 'Left' ? 'right' : 'left';
+            const d = handData[side];
+            d.detected = true;
+            if (side === 'left') handLDot.classList.add('active'); else handRDot.classList.add('active');
+
+            // Position
+            d.x += ((0.5 - lm[8].x)*2 - d.x) * 0.4;
+            d.y += ((0.5 - lm[8].y)*2 - d.y) * 0.4;
+
+            // Open hand
+            const tips = [8,12,16,20], pips = [6,10,14,18];
+            let ext = 0;
+            for (let k=0;k<4;k++) if (lm[tips[k]].y < lm[pips[k]].y) ext++;
+            if (Math.abs(lm[4].x - lm[2].x) > 0.04) ext++;
+            d.isOpen = ext >= 4;
+
+            // Fist
+            const df = Math.sqrt((lm[8].x-lm[0].x)**2 + (lm[8].y-lm[0].y)**2);
+            d.isFist = df < 0.25;
+
+            // Pinch (thumb+index)
+            const dp = Math.sqrt((lm[8].x-lm[4].x)**2 + (lm[8].y-lm[4].y)**2 + (lm[8].z-lm[4].z)**2);
+            d.isPinching = dp < 0.05;
+        }
+    } else if (inputActive) {
+        statusEl.innerText = '🖱 使用鼠标/触摸控制';
+        statusEl.style.color = '#888';
+    } else {
+        statusEl.innerText = '⏳ 搜索手势信号...';
+        statusEl.style.color = '#f55';
+        inputActive = true;
+    }
+});
+
+const cameraUtils = new Camera(videoEl, {
+    onFrame: async () => { await hands.send({ image: videoEl }); },
+    width: 320, height: 240
+});
+
+// 显式初始化 + 错误处理
+hands.initialize().then(() => {
+    setLoadProgress(50);
+    console.log('[Galaxy] MediaPipe Hands initialized');
+    return cameraUtils.start();
+}).then(() => {
+    setLoadProgress(60);
+    console.log('[Galaxy] Camera started');
+}).catch(err => {
+    console.error('[Galaxy] Init error:', err);
+    statusEl.innerText = '❌ 模型加载失败: ' + err.message;
+    statusEl.style.color = '#f44';
+    // 仍然允许鼠标/触摸
+    if (loadScreen) { loadScreen.classList.add('fade-out'); setTimeout(() => loadScreen.style.display = 'none', 800); }
+});
+
+// Auto-hide loading screen after 20s even if model not ready (allow mouse/touch)
+setTimeout(() => {
+    if (loadScreen && !loadScreen.classList.contains('fade-out')) {
+        setLoadProgress(100);
+        loadScreen.classList.add('fade-out');
+        setTimeout(() => loadScreen.style.display = 'none', 800);
+        statusEl.innerText = '⏳ 模型加载较慢，可用鼠标/触摸控制';
+        statusEl.style.color = '#fa0';
+    }
+}, 20000);
+
+// ═══════════════════════════════════════════════
+//  MOUSE + TOUCH FALLBACK
+// ═══════════════════════════════════════════════
+function onPointerMove(cx, cy) {
+    if (inputActive) { pointerX = cx / innerWidth; pointerY = cy / innerHeight; }
+}
+window.addEventListener('mousemove', e => onPointerMove(e.clientX, e.clientY));
+window.addEventListener('touchmove', e => { e.preventDefault(); onPointerMove(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
+window.addEventListener('mousedown', () => { if (inputActive) pointerDown = true; });
+window.addEventListener('mouseup', () => { if (inputActive) pointerDown = false; });
+window.addEventListener('touchstart', () => { if (inputActive) pointerDown = true; }, { passive: true });
+window.addEventListener('touchend', () => { if (inputActive) pointerDown = false; }, { passive: true });
+window.addEventListener('wheel', e => {
+    if (inputActive) { targetExpansion += e.deltaY > 0 ? -0.08 : 0.08; targetExpansion = Math.max(0.2, Math.min(2.5, targetExpansion)); }
+});
+
+// ═══════════════════════════════════════════════
+//  ANIMATION LOOP
+// ═══════════════════════════════════════════════
+const clock = new THREE.Clock();
+
+function animate() {
+    requestAnimationFrame(animate);
+    const time = clock.getElapsedTime();
+
+    const bothDetected = handData.left.detected && handData.right.detected;
+
+    if (bothDetected) {
+        const dx = handData.left.x - handData.right.x;
+        const dy = handData.left.y - handData.right.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+
+        // Pinch detection (either hand) → cycle shape
+        const eitherPinch = handData.left.isPinching || handData.right.isPinching;
+        if (eitherPinch && Date.now() - lastPinchTime > 600) {
+            lastPinchTime = Date.now();
+            nextShape();
+        }
+
+        if (dist < 0.5) {
+            // Hands close → heart
+            heartTransitionTimer++;
+            if (heartTransitionTimer > 15 && currentShape !== 'heart') {
+                currentShape = 'heart'; switchShape('heart');
+            }
+            const midX = (handData.left.x + handData.right.x) / 2;
+            const midY = (handData.left.y + handData.right.y) / 2;
+            targetRotY = midX * 2; targetRotX = midY;
+            targetExpansion = 1.0 + (1 - dist) * 0.5;
+        } else {
+            heartTransitionTimer = 0;
+            if (currentShape === 'heart') { currentShape = SHAPES[currentShapeIndex]; switchShape(currentShape); }
+            const dom = handData.right.detected ? handData.right : handData.left;
+            targetRotY = dom.x * 2; targetRotX = dom.y;
+            targetExpansion = dom.isOpen ? 1.5 : (dom.isFist ? 0.3 : 1.0);
+        }
+    } else if (inputActive) {
+        if (currentShape !== SHAPES[currentShapeIndex]) {
+            heartTransitionTimer = 0;
+            currentShape = SHAPES[currentShapeIndex]; switchShape(currentShape);
+        }
+        targetRotY = (pointerX - 0.5) * 3; targetRotX = (pointerY - 0.5) * 1.5;
+        targetExpansion = pointerDown ? Math.max(0.2, targetExpansion - 0.01) : Math.min(1.5, targetExpansion + 0.005);
+    } else {
+        const single = handData.left.detected ? handData.left : handData.right.detected ? handData.right : null;
+        if (single) {
+            // Pinch → cycle shape
+            if (single.isPinching && Date.now() - lastPinchTime > 600) {
+                lastPinchTime = Date.now(); nextShape();
+            }
+            targetRotY = single.x * 2; targetRotX = single.y;
+            targetExpansion = single.isOpen ? 1.5 : (single.isFist ? 0.3 : 1.0);
+        }
+        if (currentShape !== SHAPES[currentShapeIndex]) {
+            heartTransitionTimer = 0; currentShape = SHAPES[currentShapeIndex]; switchShape(currentShape);
+        }
+    }
+
+    // Smooth interpolation
+    rotationX += (targetRotX - rotationX) * 0.06;
+    rotationY += (targetRotY - rotationY) * 0.06;
+    expansionFactor += (targetExpansion - expansionFactor) * 0.05;
+
+    particleSystem.rotation.x = rotationX * 0.5;
+    particleSystem.rotation.y = rotationY + time * autoRotateSpeed;
+
+    // Update positions + colors
+    const posArr = geometry.attributes.position.array;
+    const colArr = geometry.attributes.color.array;
+    const lerpSpd = currentShape === 'heart' ? 0.08 : 0.04;
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const ix = i*3, iy = i*3+1, iz = i*3+2;
+        const tx = targetPositions[ix] * expansionFactor;
+        const ty = targetPositions[iy] * expansionFactor;
+        const tz = targetPositions[iz] * expansionFactor;
+        const noise = Math.sin(time*0.8 + i*0.1) * 0.015;
+
+        posArr[ix] += (tx - posArr[ix]) * lerpSpd + noise;
+        posArr[iy] += (ty - posArr[iy]) * lerpSpd;
+        posArr[iz] += (tz - posArr[iz]) * lerpSpd + noise;
+
+        colArr[ix]   += (targetColors[ix]   - colArr[ix])   * 0.04;
+        colArr[iy]   += (targetColors[iy]   - colArr[iy])   * 0.04;
+        colArr[iz]   += (targetColors[iz]   - colArr[iz])   * 0.04;
+    }
+    geometry.attributes.position.needsUpdate = true;
+    geometry.attributes.color.needsUpdate = true;
+
+    // Glow
+    glow.material.opacity = 0.04 + Math.sin(time*2) * 0.02;
+    glow.scale.setScalar(1 + Math.sin(time*1.5) * 0.1);
+
+    renderer.render(scene, camera);
+}
+
+function showLabel(text) {
+    shapeLabelEl.innerText = text;
+    shapeLabelEl.style.opacity = 1;
+    clearTimeout(shapeLabelEl._t);
+    shapeLabelEl._t = setTimeout(() => shapeLabelEl.style.opacity = 0, 2500);
+}
+
+// ═══════════════════════════════════════════════
+//  RESIZE
+// ═══════════════════════════════════════════════
+window.addEventListener('resize', () => {
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+});
+
+animate();
+</script>
+</body>
+</html>
