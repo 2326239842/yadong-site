@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>🛰️ ISS 太空雷达 - 实时卫星追踪</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000008;overflow:hidden;font-family:'Courier New',monospace;color:#00ffcc}
+#globe{position:fixed;top:0;left:0;width:100%;height:100%;touch-action:none}
+#loading{position:fixed;top:0;left:0;width:100%;height:100%;background:#000008;z-index:100;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:14px;letter-spacing:3px;transition:opacity .5s}
+#loading.done{opacity:0;pointer-events:none}
+#loading .bar{width:200px;height:2px;background:rgba(0,255,204,.1);margin-top:16px;overflow:hidden}
+#loading .bar-fill{height:100%;background:#00ffcc;animation:load 1.2s ease forwards}
+@keyframes load{0%{width:0}100%{width:100%}}
+#hud{position:fixed;top:16px;left:16px;z-index:10;pointer-events:none}
+#hud .label{font-size:10px;letter-spacing:2px;color:rgba(0,255,204,.5);margin-bottom:4px}
+#hud .count{font-size:20px;letter-spacing:1px}
+#hud .count span{color:#fff}
+#satellites{position:fixed;top:16px;right:16px;z-index:10;text-align:right;max-width:180px}
+#satellites .sat-item{padding:6px 10px;margin:3px 0;border:1px solid rgba(0,255,204,.15);border-radius:4px;font-size:11px;cursor:pointer;transition:all .2s;pointer-events:auto;background:rgba(0,0,0,.4)}
+#satellites .sat-item:hover,#satellites .sat-item.active{border-color:#00ffcc;background:rgba(0,255,204,.1)}
+#satellites .name{color:#ccc}
+#satellites .active .name{color:#00ffcc}
+#satellites .alt{font-size:9px;color:#888;margin-left:6px}
+#bottom{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:10;font-size:10px;letter-spacing:2px;color:rgba(0,255,204,.4);text-align:center}
+#detail{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);z-index:50;display:none;align-items:center;justify-content:center;padding:20px}
+#detail.show{display:flex}
+#detail .panel{background:rgba(0,20,15,.95);border:1px solid rgba(0,255,204,.3);border-radius:8px;padding:20px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto;font-size:12px}
+#detail h2{font-size:14px;margin-bottom:12px;letter-spacing:1px}
+#detail .close{position:absolute;top:12px;right:12px;background:none;border:1px solid rgba(0,255,204,.3);color:#00ffcc;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:12px}
+#detail .spec{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0}
+#detail .spec-item{padding:5px 8px;background:rgba(0,255,204,.03);border:1px solid rgba(0,255,204,.08);border-radius:3px}
+#detail .spec-label{font-size:9px;color:#66aaa0}
+#detail .spec-val{color:#00ffcc;margin-top:2px}
+#detail .desc{color:#99bbbb;line-height:1.6;margin:8px 0}
+#hint{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:10;font-size:9px;color:rgba(0,255,204,.25);letter-spacing:1px;animation:fade 3s infinite}
+@keyframes fade{0%,100%{opacity:.25}50%{opacity:.6}}
+</style>
+</head>
+<body>
+<div id="loading"><div>SATELLITE TRACKING</div><div class="bar"><div class="bar-fill"></div></div></div>
+<div id="globe"></div>
+<div id="hud">
+<div class="label">TRACKING</div>
+<div class="count" id="count"><span>0</span> satellites</div>
+</div>
+<div id="satellites"></div>
+<div id="bottom">拖动旋转 · 双指/滚轮缩放 · 点击标记查看详情</div>
+<div id="hint">👆 触摸地球开始探索</div>
+<div id="detail"><div class="panel" id="detail-panel"></div></div>
+<script src="assets/three.min.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
