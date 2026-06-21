@@ -72,6 +72,7 @@ function init() {
   
   // Earth
   const loader = new THREE.TextureLoader();
+  loader.setCrossOrigin('anonymous');
   loader.load('earth_daymap.jpg', tex => {
     tex.colorSpace = THREE.SRGBColorSpace;
     const geo = new THREE.SphereGeometry(EARTH_R, 64, 64);
