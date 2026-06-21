@@ -131,7 +131,7 @@ function init() {
   // Earth
   const loader = new THREE.TextureLoader();
   loader.setCrossOrigin('anonymous');
-  loader.load('earth_daymap.jpg', tex => {
+  loader.load('assets/earth_daymap.jpg', tex => {
     tex.colorSpace = THREE.SRGBColorSpace;
     const geo = new THREE.SphereGeometry(EARTH_R, 64, 64);
     earthMesh = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({map:tex,shininess:10}));
@@ -143,7 +143,7 @@ function init() {
   });
   
   // Clouds
-  loader.load('earth_clouds.png', tex => {
+  loader.load('assets/earth_clouds.png', tex => {
     const geo = new THREE.SphereGeometry(EARTH_R+0.3, 64, 64);
     cloudsMesh = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({map:tex,transparent:true,opacity:0.4,depthWrite:false}));
     scene.add(cloudsMesh);
