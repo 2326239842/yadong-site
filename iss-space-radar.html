@@ -36,6 +36,16 @@ body{background:#000008;overflow:hidden;font-family:'Courier New',monospace;colo
 #detail .spec-label{font-size:9px;color:#66aaa0}
 #detail .spec-val{color:#00ffcc;margin-top:2px}
 #detail .desc{color:#99bbbb;line-height:1.6;margin:8px 0}
+#detail .detail-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+#detail .detail-badge{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+#detail .detail-cat{font-size:10px;color:#66aaa0;margin-top:2px}
+#detail .detail-section-title{font-size:11px;color:rgba(0,255,204,.7);margin:14px 0 8px;padding-bottom:4px;border-bottom:1px solid rgba(0,255,204,.1);letter-spacing:1px}
+#detail .detail-bars{margin:8px 0}
+#detail .bar-row{display:flex;align-items:center;gap:8px;margin:5px 0}
+#detail .bar-label{font-size:9px;color:#66aaa0;width:60px;flex-shrink:0}
+#detail .bar-track{flex:1;height:6px;background:rgba(0,255,204,.08);border-radius:3px;overflow:hidden}
+#detail .bar-fill{height:100%;border-radius:3px;transition:width .5s}
+#detail .bar-val{font-size:10px;color:#00ffcc;width:80px;text-align:right;flex-shrink:0}
 #controls{position:fixed;bottom:50px;right:16px;z-index:10;display:flex;flex-direction:column;gap:6px}
 #controls button{background:rgba(0,0,0,.5);border:1px solid rgba(0,255,204,.2);color:#00ffcc;padding:6px 10px;border-radius:4px;font-size:10px;cursor:pointer;letter-spacing:1px;font-family:inherit;transition:all .2s}
 #controls button:hover{background:rgba(0,255,204,.15);border-color:#00ffcc}
@@ -61,10 +71,13 @@ body{background:#000008;overflow:hidden;font-family:'Courier New',monospace;colo
 <button onclick="resetView()">重置视角</button>
 </div>
 <div id="legend">
-<div><span class="dot" style="background:#ff6b9d"></span> 近地轨道 (LEO)</div>
+<div><span class="dot" style="background:#ff6b9d"></span> 载人空间站 (LEO)</div>
 <div><span class="dot" style="background:#4d96ff"></span> 科学观测</div>
 <div><span class="dot" style="background:#ffd93d"></span> 星链星座</div>
-<div><span class="dot" style="background:#ff9966"></span> 导航系统 (GNSS)</div>
+<div><span class="dot" style="background:#ff9966"></span> GPS 导航</div>
+<div><span class="dot" style="background:#cc99ff"></span> Galileo 导航</div>
+<div><span class="dot" style="background:#ff4444"></span> 北斗导航</div>
+<div><span class="dot" style="background:#00ddff"></span> 铱星通信</div>
 </div>
 <div id="bottom">拖动旋转 · 双指/滚轮缩放 · 点击卫星查看详情</div>
 <div id="detail"><div class="panel" id="detail-panel"></div></div>
@@ -87,7 +100,9 @@ const SATS = {
   GPS:      {name:'GPS IIF-12',     color:0xff9966, cat:'gnss',     alt:20180,inc:55.0, raan:180, mass:'1.6吨', period:'12 h',   country:'美国',     launch:'2012-10-04', desc:'GPS Block IIF 卫星运行在中地球轨道，提供全球导航定位服务，精度优于1米。'},
   Galileo:  {name:'Galileo-27',     color:0xcc99ff, cat:'gnss',     alt:23222,inc:56.0, raan:300, mass:'700 kg',period:'14h7m',  country:'欧盟',     launch:'2016-11-17', desc:'伽利略导航卫星系统是欧洲独立运行的全球导航系统，使用高精度氢原子钟。'},
   Starlink2:{name:'Starlink 备用组', color:0xffd93d, cat:'starlink', alt:550,  inc:53.0, raan:45,  mass:'260 kg',  period:'95 min', country:'SpaceX',   launch:'2019-05-14', desc:'Starlink 备份轨道群组，为区域覆盖提供冗余保障。'},
-  Starlink3:{name:'Starlink 第三组', color:0xffd93d, cat:'starlink', alt:550,  inc:53.0, raan:90,  mass:'260 kg',  period:'95 min', country:'SpaceX',   launch:'2019-05-14', desc:'Starlink 第三轨道群组，增强赤道区域覆盖密度。'}
+  Starlink3:{name:'Starlink 第三组', color:0xffd93d, cat:'starlink', alt:550,  inc:53.0, raan:90,  mass:'260 kg',  period:'95 min', country:'SpaceX',   launch:'2019-05-14', desc:'Starlink 第三轨道群组，增强赤道区域覆盖密度。'},
+  BeiDou:   {name:'北斗三号 MEO-24', color:0xff4444, cat:'gnss',     alt:21528,inc:55.0, raan:240, mass:'1.0吨',  period:'12h38m', country:'中国',     launch:'2023-05-17', desc:'北斗三号全球卫星导航系统是中国自主研发的全球定位系统，由30颗卫星组成，提供全球定位、导航和授时服务，定位精度优于10米，短报文通信是其独有特色。', specs:{orbit:'MEO', semimajor:'27906km', eccentricity:'0.002', argPerigee:'0°', clock:'氢原子钟', signal:'B1C/B2a/B3I', coverage:'全球'}},
+  Iridium:  {name:'Iridium NEXT 15',color:0x00ddff, cat:'comm',     alt:780,  inc:86.4, raan:330, mass:'860 kg', period:'100min',  country:'Iridium',  launch:'2017-06-25', desc:'铱星NEXT是第二代铱星通信星座，共66颗卫星运行在极地轨道，提供全球无缝覆盖的语音和数据通信服务，是唯一覆盖两极地区的商业卫星系统。', specs:{orbit:'LEO 极地', semimajor:'7155km', eccentricity:'0.0002', argPerigee:'90°', clock:'铷原子钟', signal:'L-band', coverage:'全球含两极'}}
 };
 
 const EARTH_R = 50;
@@ -430,22 +445,75 @@ window.selectSat = function(key) {
 window.showDetail = function(key) {
   const s = SATS[key], d = satData[key], ov = document.getElementById('detail'), pnl = document.getElementById('detail-panel');
   const c = s.color, hex = '#'+c.toString(16).padStart(6,'0');
+  const catNames = {iss:'载人空间站',hubble:'科学观测',starlink:'通信星座',gnss:'导航系统',comm:'通信卫星'};
+  const catIcon = {iss:'🚀',hubble:'🔭',starlink:'📡',gnss:'🧭',comm:'📶'};
+  const elapsed = (Date.now()-simStart)/1000;
+  // Parse period to seconds (handles "92 min", "12 h", "12h38m", "100min", "14h7m")
+  function parsePeriod(p) {
+    const hm = p.match(/(\d+)h(\d+)m/);
+    if(hm) return parseInt(hm[1])*3600 + parseInt(hm[2])*60;
+    const h = p.match(/([\d.]+)\s*h/);
+    if(h) return parseFloat(h[1])*3600;
+    const m = p.match(/([\d.]+)\s*min/);
+    if(m) return parseFloat(m[1])*60;
+    return parseFloat(p)*60;
+  }
+  const period_sec = parsePeriod(s.period);
+  const orbits_done = (elapsed / period_sec).toFixed(1);
+  const dist_traveled = (parseFloat(d?d.vel:'7.66') * elapsed / 1000).toFixed(0);
+  const altR = d ? d.alt : s.alt;
+  const altPct = Math.min(100, (altR / 36000) * 100);
+  const spd = d ? parseFloat(d.vel) : 7.66;
+  const spdPct = Math.min(100, (spd / 11) * 100);
+
+  // 轨道参数计算
+  const semiMajor = (6371 + altR).toFixed(0);
+  const orbitalEnergy = (spd*spd/2 - 398600/(6371+altR)).toFixed(1);
+  const angularVel = (360 / (period_sec)).toFixed(4);
+
+  let specsHTML = '';
+  if(s.specs) {
+    for(const [k,v] of Object.entries(s.specs)) {
+      const labels = {orbit:'轨道类型',semimajor:'半长轴',eccentricity:'偏心率',argPerigee:'近地点幅角',clock:'星载时钟',signal:'信号频段',coverage:'覆盖范围'};
+      specsHTML += `<div class="spec-item"><div class="spec-label">${labels[k]||k}</div><div class="spec-val">${v}</div></div>`;
+    }
+  }
+
   pnl.innerHTML = `
     <button class="close" onclick="closeDetail()">✕</button>
-    <h2 style="color:${hex}">${s.name}</h2>
+    <div class="detail-header">
+      <div class="detail-badge" style="background:${hex}">${catIcon[s.cat]||'🛰️'}</div>
+      <div>
+        <h2 style="color:${hex};margin:0">${s.name}</h2>
+        <div class="detail-cat">${catNames[s.cat]||s.cat} · ${s.country}</div>
+      </div>
+    </div>
     <div class="desc">${s.desc}</div>
+    <div class="detail-section-title">📊 实时数据</div>
+    <div class="detail-bars">
+      <div class="bar-row"><span class="bar-label">轨道高度</span><div class="bar-track"><div class="bar-fill" style="width:${altPct}%;background:${hex}"></div></div><span class="bar-val">${altR.toLocaleString()} km</span></div>
+      <div class="bar-row"><span class="bar-label">运行速度</span><div class="bar-track"><div class="bar-fill" style="width:${spdPct}%;background:${hex}"></div></div><span class="bar-val">${spd} km/s</span></div>
+    </div>
     <div class="spec">
-      <div class="spec-item"><div class="spec-label">国家/组织</div><div class="spec-val">${s.country}</div></div>
+      <div class="spec-item"><div class="spec-label">实时纬度</div><div class="spec-val">${d?d.lat.toFixed(4)+'°':'--'}</div></div>
+      <div class="spec-item"><div class="spec-label">实时经度</div><div class="spec-val">${d?d.lon.toFixed(4)+'°':'--'}</div></div>
+      <div class="spec-item"><div class="spec-label">已绕圈数</div><div class="spec-val">${orbits_done}</div></div>
+      <div class="spec-item"><div class="spec-label">累计行程</div><div class="spec-val">${dist_traveled} Mm</div></div>
+    </div>
+    <div class="detail-section-title">🔧 轨道参数</div>
+    <div class="spec">
+      <div class="spec-item"><div class="spec-label">轨道倾角</div><div class="spec-val">${s.inc}°</div></div>
+      <div class="spec-item"><div class="spec-label">升交点赤经</div><div class="spec-val">${s.raan}°</div></div>
+      <div class="spec-item"><div class="spec-label">轨道周期</div><div class="spec-val">${s.period}</div></div>
+      <div class="spec-item"><div class="spec-label">半长轴</div><div class="spec-val">${semiMajor} km</div></div>
+      <div class="spec-item"><div class="spec-label">角速度</div><div class="spec-val">${angularVel} °/s</div></div>
+      <div class="spec-item"><div class="spec-label">轨道能量</div><div class="spec-val">${orbitalEnergy} km²/s²</div></div>
+    </div>
+    <div class="detail-section-title">📋 基本信息</div>
+    <div class="spec">
       <div class="spec-item"><div class="spec-label">发射日期</div><div class="spec-val">${s.launch}</div></div>
       <div class="spec-item"><div class="spec-label">质量</div><div class="spec-val">${s.mass}</div></div>
-      <div class="spec-item"><div class="spec-label">轨道周期</div><div class="spec-val">${s.period}</div></div>
-      <div class="spec-item"><div class="spec-label">高度</div><div class="spec-val">${d?d.alt:s.alt} km</div></div>
-      <div class="spec-item"><div class="spec-label">速度</div><div class="spec-val">${d?d.vel:'7.66'} km/s</div></div>
-      <div class="spec-item"><div class="spec-label">纬度</div><div class="spec-val">${d?d.lat.toFixed(2)+'°':'--'}</div></div>
-      <div class="spec-item"><div class="spec-label">经度</div><div class="spec-val">${d?d.lon.toFixed(2)+'°':'--'}</div></div>
-    </div>
-    <div style="font-size:10px;color:#66aaa0;margin-top:12px">
-      <span style="color:${hex}">●</span> 轨道倾角 ${s.inc}° | RAAN ${s.raan}°
+      ${s.specs ? specsHTML : ''}
     </div>
   `;
   ov.classList.add('show');
