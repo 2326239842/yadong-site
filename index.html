@@ -260,55 +260,39 @@ footer{text-align:center;padding:2.2rem 0;color:var(--tx3);font-size:.75rem;bord
   <div class="scroll-hint"><div class="scroll-line"></div><span>SCROLL</span></div>
 </section>
 
-<!-- GESTURE GALLERY -->
-<section class="section" id="gesture-galaxy"><div class="wrap">
-  <span class="sec-label">Creative Project</span>
-  <h2 class="sec-title">🌌 手势星系</h2>
-  <p class="sec-desc">一个用手势控制的 3D 互动空间，不用装任何插件，打开浏览器就能玩。</p>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:2rem;align-items:center">
-    <div style="border-radius:16px;overflow:hidden;border:1px solid var(--bdr);background:#0a0a14;position:relative;aspect-ratio:16/10;box-shadow:0 8px 32px rgba(79,255,255,.1)">
-      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:4rem;background:radial-gradient(circle at 30% 40%,rgba(79,255,255,.08),transparent 60%)">🌌</div>
-      <div style="position:absolute;bottom:0;left:0;right:0;padding:1rem;background:linear-gradient(transparent,rgba(0,0,0,.7));font-size:.75rem;color:#66aaff;text-align:center">手势控制 · 指尖交互 · WebGL</div>
-    </div>
-    <div>
-      <div style="margin-bottom:1rem">
-        <div style="font-size:.75rem;color:#4ff;margin-bottom:.3rem;letter-spacing:.1em;text-transform:uppercase">What is it</div>
-        <p style="color:var(--tx2);font-size:.92rem;line-height:1.7">通过摄像头捕捉手部动作，用手指旋转、缩放、点击来操控 3D 星系模型。基于 MediaPipe + Three.js 构建。</p>
-      </div>
-      <div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:1.5rem">
-        <span style="padding:.35rem .8rem;border-radius:999px;background:rgba(79,255,255,.08);border:1px solid rgba(79,255,255,.2);font-size:.75rem;color:#4ff">MediaPipe</span>
-        <span style="padding:.35rem .8rem;border-radius:999px;background:rgba(79,255,255,.08);border:1px solid rgba(79,255,255,.2);font-size:.75rem;color:#4ff">Three.js</span>
-        <span style="padding:.35rem .8rem;border-radius:999px;background:rgba(79,255,255,.08);border:1px solid rgba(79,255,255,.2);font-size:.75rem;color:#4ff">WebGL</span>
-        <span style="padding:.35rem .8rem;border-radius:999px;background:rgba(79,255,255,.08);border:1px solid rgba(79,255,255,.2);font-size:.75rem;color:#4ff">实时</span>
-      </div>
-      <a href="galaxy/" target="_blank" style="display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.5rem;border-radius:10px;background:linear-gradient(135deg,rgba(79,255,255,.12),rgba(100,200,255,.06));border:1px solid rgba(79,255,255,.3);color:#4ff;font-size:.88rem;font-weight:600;text-decoration:none;transition:all .3s" onmouseover="this.style.background='rgba(79,255,255,.2)';this.style.transform='translateY(-1px)'" onmouseout="this.style.background='linear-gradient(135deg,rgba(79,255,255,.12),rgba(100,200,255,.06))';this.style.transform=''">✨ 启动手势星系 →</a>
-    </div>
-  </div>
-</div></section>
+<!-- MY PROJECTS -->
+<section class="section" id="projects"><div class="wrap">
+  <span class="sec-label">Creative Projects</span>
+  <h2 class="sec-title">🛠️ 我的项目</h2>
+  <p class="sec-desc">用前端技术做的交互实验，纯浏览器打开即玩，无需安装任何东西。</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:2.5rem">
 
-<!-- ISS SPACE RADAR -->
-<section class="section" id="iss-radar"><div class="wrap">
-  <span class="sec-label">Creative Project</span>
-  <h2 class="sec-title">🛰️ ISS 太空雷达</h2>
-  <p class="sec-desc">实时追踪国际空间站和 8 颗在轨卫星，3D 地球交互，拖动旋转查看轨道参数。</p>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:2rem;align-items:center">
-    <div style="border-radius:16px;overflow:hidden;border:1px solid var(--bdr);background:#0a0a14;position:relative;aspect-ratio:16/10;box-shadow:0 8px 32px rgba(0,255,204,.1)">
-      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:4rem;background:radial-gradient(circle at 50% 50%,rgba(0,255,204,.06),transparent 60%)">🛰️</div>
-      <div style="position:absolute;bottom:0;left:0;right:0;padding:1rem;background:linear-gradient(transparent,rgba(0,0,0,.7));font-size:.75rem;color:#66aaa0;text-align:center">实时追踪 · 3D 地球 · 轨道可视化</div>
-    </div>
-    <div>
-      <div style="margin-bottom:1rem">
-        <div style="font-size:.75rem;color:#00ffcc;margin-bottom:.3rem;letter-spacing:.1em;text-transform:uppercase">What is it</div>
-        <p style="color:var(--tx2);font-size:.92rem;line-height:1.7">基于 TLE 轨道数据实时计算卫星位置，渲染 3D 地球和卫星轨迹。支持拖动旋转、缩放、点击查看详细信息。</p>
+    <!-- Gesture Galaxy -->
+    <div style="border-radius:16px;border:1px solid rgba(79,255,255,.15);background:rgba(79,255,255,.03);padding:2rem;transition:border-color .3s" onmouseover="this.style.borderColor='rgba(79,255,255,.4)'" onmouseout="this.style.borderColor='rgba(79,255,255,.15)'">
+      <div style="font-size:2.5rem;margin-bottom:.8rem">🌌</div>
+      <h3 style="font-size:1.15rem;color:#4ff;margin-bottom:.5rem">手势星系</h3>
+      <p style="color:var(--tx2);font-size:.88rem;line-height:1.7;margin-bottom:1.2rem">通过摄像头捕捉手部动作，用手指旋转、缩放、点击来操控 3D 粒子星系。11 种形态、双手交互。</p>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.2rem">
+        <span style="padding:.25rem .6rem;border-radius:999px;background:rgba(79,255,255,.08);border:1px solid rgba(79,255,255,.2);font-size:.7rem;color:#4ff">MediaPipe</span>
+        <span style="padding:.25rem .6rem;border-radius:999px;background:rgba(79,255,255,.08);border:1px solid rgba(79,255,255,.2);font-size:.7rem;color:#4ff">Three.js</span>
+        <span style="padding:.25rem .6rem;border-radius:999px;background:rgba(79,255,255,.08);border:1px solid rgba(79,255,255,.2);font-size:.7rem;color:#4ff">WebGL</span>
       </div>
-      <div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:1.5rem">
-        <span style="padding:.35rem .8rem;border-radius:999px;background:rgba(0,255,204,.08);border:1px solid rgba(0,255,204,.2);font-size:.75rem;color:#00ffcc">Three.js</span>
-        <span style="padding:.35rem .8rem;border-radius:999px;background:rgba(0,255,204,.08);border:1px solid rgba(0,255,204,.2);font-size:.75rem;color:#00ffcc">TLE 数据</span>
-        <span style="padding:.35rem .8rem;border-radius:999px;background:rgba(0,255,204,.08);border:1px solid rgba(0,255,204,.2);font-size:.75rem;color:#00ffcc">轨道计算</span>
-        <span style="padding:.35rem .8rem;border-radius:999px;background:rgba(0,255,204,.08);border:1px solid rgba(0,255,204,.2);font-size:.75rem;color:#00ffcc">3D 交互</span>
-      </div>
-      <a href="iss-space-radar.html" target="_blank" style="display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.5rem;border-radius:10px;background:linear-gradient(135deg,rgba(0,255,204,.12),rgba(100,200,255,.06));border:1px solid rgba(0,255,204,.3);color:#00ffcc;font-size:.88rem;font-weight:600;text-decoration:none;transition:all .3s" onmouseover="this.style.background='rgba(0,255,204,.2)';this.style.transform='translateY(-1px)'" onmouseout="this.style.background='linear-gradient(135deg,rgba(0,255,204,.12),rgba(100,200,255,.06))';this.style.transform=''">🚀 打开 ISS 太空雷达 →</a>
+      <a href="galaxy/" target="_blank" style="display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:8px;background:linear-gradient(135deg,rgba(79,255,255,.12),rgba(100,200,255,.06));border:1px solid rgba(79,255,255,.3);color:#4ff;font-size:.82rem;font-weight:600;text-decoration:none;transition:all .3s" onmouseover="this.style.background='rgba(79,255,255,.22)'" onmouseout="this.style.background='linear-gradient(135deg,rgba(79,255,255,.12),rgba(100,200,255,.06))'">✨ 启动手势星系 →</a>
     </div>
+
+    <!-- ISS Space Radar -->
+    <div style="border-radius:16px;border:1px solid rgba(0,255,204,.15);background:rgba(0,255,204,.03);padding:2rem;transition:border-color .3s" onmouseover="this.style.borderColor='rgba(0,255,204,.4)'" onmouseout="this.style.borderColor='rgba(0,255,204,.15)'">
+      <div style="font-size:2.5rem;margin-bottom:.8rem">🛰️</div>
+      <h3 style="font-size:1.15rem;color:#00ffcc;margin-bottom:.5rem">ISS 太空雷达</h3>
+      <p style="color:var(--tx2);font-size:.88rem;line-height:1.7;margin-bottom:1.2rem">基于 TLE 轨道数据实时计算卫星位置，3D 地球 + 8 颗在轨卫星。拖动旋转、缩放、点击标记查看详情。</p>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.2rem">
+        <span style="padding:.25rem .6rem;border-radius:999px;background:rgba(0,255,204,.08);border:1px solid rgba(0,255,204,.2);font-size:.7rem;color:#00ffcc">Three.js</span>
+        <span style="padding:.25rem .6rem;border-radius:999px;background:rgba(0,255,204,.08);border:1px solid rgba(0,255,204,.2);font-size:.7rem;color:#00ffcc">TLE 轨道</span>
+        <span style="padding:.25rem .6rem;border-radius:999px;background:rgba(0,255,204,.08);border:1px solid rgba(0,255,204,.2);font-size:.7rem;color:#00ffcc">SGP4</span>
+      </div>
+      <a href="iss-space-radar.html" target="_blank" style="display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:8px;background:linear-gradient(135deg,rgba(0,255,204,.12),rgba(100,200,255,.06));border:1px solid rgba(0,255,204,.3);color:#00ffcc;font-size:.82rem;font-weight:600;text-decoration:none;transition:all .3s" onmouseover="this.style.background='rgba(0,255,204,.22)'" onmouseout="this.style.background='linear-gradient(135deg,rgba(0,255,204,.12),rgba(100,200,255,.06))'">🚀 打开 ISS 太空雷达 →</a>
+    </div>
+
   </div>
 </div></section>
 
