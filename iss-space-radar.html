@@ -19,12 +19,21 @@ body{background:#000008;overflow:hidden;font-family:'Courier New',monospace;colo
 #hud .count span{color:#fff}
 #hud .time{font-size:11px;color:rgba(0,255,204,.6);margin-top:4px}
 #satellites{position:fixed;top:16px;right:16px;z-index:10;text-align:right;max-width:200px}
-#satellites .sat-item{padding:6px 10px;margin:3px 0;border:1px solid rgba(0,255,204,.15);border-radius:4px;font-size:11px;cursor:pointer;transition:all .2s;pointer-events:auto;background:rgba(0,0,0,.4)}
+#satellites .sat-item{padding:6px 10px;margin:3px 0;border:1px solid rgba(0,255,204,.15);border-radius:4px;font-size:11px;cursor:pointer;transition:all .3s;pointer-events:auto;background:rgba(0,0,0,.4);position:relative;overflow:hidden;display:flex;align-items:center;gap:6px}
+#satellites .sat-item::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(0,255,204,.08),transparent);transition:left .4s}
+#satellites .sat-item:hover::before{left:100%}
 #satellites .sat-item:hover,#satellites .sat-item.active{border-color:#00ffcc;background:rgba(0,255,204,.1)}
+#satellites .sat-item.active{animation:satPulse 2s infinite}
+@keyframes satPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,255,204,.3)}50%{box-shadow:0 0 8px 2px rgba(0,255,204,.2)}}
+#satellites .sat-color{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:4px;flex-shrink:0}
+#satellites .sat-info{display:flex;flex-direction:column;gap:1px}
 #satellites .name{color:#ccc}
 #satellites .active .name{color:#00ffcc}
-#satellites .alt{font-size:9px;color:#888;margin-left:6px}
-#satellites .speed{font-size:9px;color:#66aaa0;margin-left:4px}
+#satellites .alt-bar{width:100%;height:2px;background:rgba(0,255,204,.1);border-radius:1px;margin-top:2px}
+#satellites .alt-bar-fill{height:100%;border-radius:1px;transition:width .3s}
+#satellites .sat-vals{display:flex;gap:6px;font-size:9px}
+#satellites .alt{color:#888}
+#satellites .speed{color:#66aaa0}
 #bottom{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:10;font-size:10px;letter-spacing:2px;color:rgba(0,255,204,.4);text-align:center}
 #detail{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);z-index:50;display:none;align-items:center;justify-content:center;padding:20px}
 #detail.show{display:flex}
@@ -193,6 +202,8 @@ function init() {
 
   createSats();
   createOrbits();
+  createSignalBeam();
+  createGroundDot();
   updatePositions();
   updateUI();
   animate();
@@ -419,6 +430,29 @@ window.addEventListener('resize', () => { camera.aspect=innerWidth/innerHeight; 
 // ============================================================
 // UI
 // ============================================================
+let hoveredKey = null;
+let signalBeam = null, groundDot = null;
+
+function createGroundDot() {
+  const g = new THREE.RingGeometry(0.8, 1.5, 24);
+  const m = new THREE.MeshBasicMaterial({color:0x00ffcc, transparent:true, opacity:0.5, side:THREE.DoubleSide});
+  groundDot = new THREE.Mesh(g, m);
+  groundDot.visible = false;
+  scene.add(groundDot);
+}
+
+function createSignalBeam() {
+  const geo = new THREE.BufferGeometry();
+  const positions = new Float32Array(6);
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setDrawRange(0, 2);
+  const mat = new THREE.LineDashedMaterial({color:0x00ffcc, transparent:true, opacity:0.4, dashSize:2, gapSize:1.5});
+  signalBeam = new THREE.Line(geo, mat);
+  signalBeam.computeLineDistances();
+  signalBeam.visible = false;
+  scene.add(signalBeam);
+}
+
 function updateUI() {
   document.getElementById('count').innerHTML = `<span>${Object.keys(satData).length}</span> satellites tracked`;
   const elapsed = (Date.now()-simStart)/1000;
@@ -430,15 +464,81 @@ function updateUI() {
   for(const [key, s] of Object.entries(SATS)){
     const d = satData[key];
     const active = key === selectedKey ? ' active' : '';
-    html += `<div class="sat-item${active}" onclick="selectSat('${key}')"><span class="name">${s.name.split(' ')[0]}</span><span class="alt">${d?Math.round(d.alt)+'km':''}</span><span class="speed">${d?d.vel+'km/s':''}</span></div>`;
+    const hex = '#'+s.color.toString(16).padStart(6,'0');
+    const altPct = Math.min(100, (s.alt/36000)*100);
+    html += `<div class="sat-item${active}" onmouseenter="hoverSat('${key}')" onmouseleave="hoverSat(null)" onclick="selectSat('${key}')">
+      <span class="sat-color" style="background:${hex}"></span>
+      <div class="sat-info" style="flex:1">
+        <span class="name">${s.name.split(' ')[0]}</span>
+        <div class="alt-bar"><div class="alt-bar-fill" style="width:${altPct}%;background:${hex}"></div></div>
+        <div class="sat-vals"><span class="alt">${d?Math.round(d.alt)+'km':''}</span><span class="speed">${d?d.vel+'km/s':''}</span></div>
+      </div>
+    </div>`;
   }
   list.innerHTML = html;
+
+  // Update signal beam & ground dot for selected satellite
+  const sel = satData[selectedKey];
+  const selMesh = sats[selectedKey];
+  if(sel && selMesh && signalBeam && groundDot) {
+    const groundPos = llTo3D(sel.lat, sel.lon, EARTH_R + 0.5);
+    const satPos = selMesh.position;
+    // Signal beam
+    const arr = signalBeam.geometry.attributes.position.array;
+    arr[0]=satPos.x; arr[1]=satPos.y; arr[2]=satPos.z;
+    arr[3]=groundPos.x; arr[4]=groundPos.y; arr[5]=groundPos.z;
+    signalBeam.geometry.attributes.position.needsUpdate = true;
+    signalBeam.computeLineDistances();
+    signalBeam.visible = true;
+    signalBeam.material.color.set(SATS[selectedKey].color);
+    signalBeam.material.opacity = 0.3 + 0.2*Math.sin(Date.now()*0.003);
+    // Ground dot
+    groundDot.position.copy(groundPos);
+    groundDot.lookAt(0, 0, 0);
+    groundDot.visible = true;
+    groundDot.material.color.set(SATS[selectedKey].color);
+    groundDot.material.opacity = 0.3 + 0.2*Math.sin(Date.now()*0.002);
+    const sc = 1 + 0.3*Math.sin(Date.now()*0.004);
+    groundDot.scale.set(sc, sc, 1);
+  } else if(signalBeam) {
+    signalBeam.visible = false;
+    groundDot.visible = false;
+  }
+
+  // Orbit line dimming: highlight selected orbit, dim others
+  for(const [k, line] of Object.entries(orbitLines)) {
+    line.material.opacity = k === selectedKey ? 0.6 : 0.12;
+  }
 }
+
+window.hoverSat = function(key) {
+  hoveredKey = key;
+  // Brighten hovered satellite's glow
+  for(const [k, mesh] of Object.entries(sats)) {
+    const glow = mesh.getObjectByName('glow');
+    if(glow) glow.scale.set(k===key ? 7 : 5, k===key ? 7 : 5, 1);
+  }
+};
 
 window.selectSat = function(key) {
   selectedKey = key;
   const d = satData[key];
-  if(d){camTarget.lat=d.lat; camTarget.lng=d.lon; camTarget.dist=120; autoRotate=false;}
+  if(d){
+    // Smooth fly animation
+    const startLat = camCur.lat, startLng = camCur.lng, startDist = camCur.dist;
+    const targetLat = d.lat, targetLng = d.lon, targetDist = 120;
+    const startTime = Date.now(), duration = 800;
+    autoRotate = false;
+    function flyStep() {
+      const t = Math.min(1, (Date.now()-startTime)/duration);
+      const ease = t<0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; // easeInOutCubic
+      camTarget.lat = startLat + (targetLat-startLat)*ease;
+      camTarget.lng = startLng + (targetLng-startLng)*ease;
+      camTarget.dist = startDist + (targetDist-startDist)*ease;
+      if(t<1) requestAnimationFrame(flyStep);
+    }
+    flyStep();
+  }
   updateUI();
 };
 
