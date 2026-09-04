@@ -1,1017 +1,1124 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Yadong's Space</title>
-<style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Noto Sans SC',sans-serif;line-height:1.7;overflow-x:hidden}
-a{color:inherit;text-decoration:none}
-:root{
-  --bg:#0e0e1a;--bg2:#16162a;--bg3:#1e1e36;--bg4:#282848;
-  --bdr:rgba(255,255,255,.1);--bdr2:rgba(255,255,255,.18);
-  --tx:#f4f4ff;--tx2:#b0b0d0;--tx3:#6868a0;
-  --ac:#a78bfa;--ac2:rgba(167,139,250,.12);--ac3:rgba(167,139,250,.25);
-  --pink:#f472b6;--gold:#fbbf24;--radius:14px;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏗️</text></svg>">
+    <title>Yadong — 土木 × AI</title>
+    <style id="theme-vars">
+:root {
+  /* Brand prefix: yd */
+  --yd-background: #0b0f12;
+  --yd-foreground: #eef2f5;
+
+  --yd-card: #11171b;
+  --yd-card-foreground: #eef2f5;
+  --yd-popover: #11171b;
+  --yd-popover-foreground: #eef2f5;
+
+  --yd-primary: #0d9488;
+  --yd-primary-foreground: #ffffff;
+
+  --yd-muted: #182026;
+  --yd-muted-foreground: #93a3b0;
+
+  --yd-border: rgba(148, 163, 184, 0.12);
+  --yd-input: rgba(148, 163, 184, 0.16);
+  --yd-ring: #0d9488;
+
+  --yd-radius-sm: 4px;
+  --yd-radius-md: 8px;
+  --yd-radius-lg: 16px;
+  --yd-radius: 8px;
+
+  --yd-font-sans: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --yd-font-mono: "SF Mono", "JetBrains Mono", "Fira Code", monospace;
+
+  --yd-shadow-1: 0 1px 2px rgba(2, 8, 16, 0.25), 0 1px 1px rgba(2, 8, 16, 0.15);
+  --yd-shadow-2: 0 8px 24px -8px rgba(2, 8, 16, 0.45);
+  --yd-shadow-3: 0 24px 60px -20px rgba(2, 8, 16, 0.55);
 }
-body.light{
-  --bg:#f0f0f5;--bg2:#fff;--bg3:#e4e4ee;--bg4:#d8d8e6;
-  --bdr:rgba(0,0,0,.1);--bdr2:rgba(0,0,0,.18);
-  --tx:#111128;--tx2:#44446a;--tx3:#8888aa;
-  --ac:#6d5ce7;--ac2:rgba(109,92,231,.1);--ac3:rgba(109,92,231,.2);
+
+.light {
+  --yd-background: #f5f7f8;
+  --yd-foreground: #0b1216;
+  --yd-card: #ffffff;
+  --yd-card-foreground: #0b1216;
+  --yd-popover: #ffffff;
+  --yd-popover-foreground: #0b1216;
+  --yd-primary: #0d9488;
+  --yd-primary-foreground: #ffffff;
+  --yd-muted: #e8edef;
+  --yd-muted-foreground: #556670;
+  --yd-border: rgba(15, 33, 42, 0.10);
+  --yd-input: rgba(15, 33, 42, 0.14);
+  --yd-ring: #0d9488;
+  --yd-shadow-1: 0 1px 2px rgba(11, 18, 22, 0.06), 0 1px 1px rgba(11, 18, 22, 0.04);
+  --yd-shadow-2: 0 8px 24px -8px rgba(11, 18, 22, 0.14);
+  --yd-shadow-3: 0 24px 60px -20px rgba(11, 18, 22, 0.20);
 }
-body.light{background:#f0f0f5;color:#111128}
-body.light .hero{background:linear-gradient(180deg,#e8e0f8 0%,#f0f0f5 100%)}
-body.light .hero-h1{color:#111128}
-body.light .hero-sub{color:#44446a}
-body.light .hero-glow{background:radial-gradient(ellipse 70% 45% at 50% 88%,rgba(109,92,231,.12),transparent 70%)}
-body.light .scroll-hint{color:rgba(0,0,0,.3)}
-body.light .scroll-line{background:linear-gradient(rgba(0,0,0,.3),transparent)}
-body.light .sakura-page{background:linear-gradient(180deg,#f5eef8 0%,#e8e0f0 50%,#f0f0f5 100%)}
-body.light .sakura-title{color:#111128;text-shadow:0 0 30px rgba(109,92,231,.15)}
-body.light .sakura-sub{color:rgba(50,50,80,.5)}
-body.light .sakura-msg{color:rgba(80,60,100,.8)}
-body.light .sakura-hint{color:rgba(0,0,0,.25)}
-body.light .section{border-top-color:rgba(0,0,0,.08)}
-body.light .sec-label{color:#6d5ce7;background:rgba(109,92,231,.08)}
-body.light .sec-title{color:#111128}
-body.light .sec-desc{color:#44446a}
-body.light .stat{background:#fff;border-color:rgba(0,0,0,.08)}
-body.light .stat:hover{border-color:rgba(0,0,0,.15)}
-body.light .sk{background:#fff;border-color:rgba(0,0,0,.08)}
-body.light .sk:hover{border-color:#6d5ce7;box-shadow:0 8px 24px rgba(109,92,231,.12)}
-body.light .ph-item{background:#fff}
-body.light .tl-dot{background:#6d5ce7;box-shadow:0 0 10px rgba(109,92,231,.3),0 0 0 3px rgba(109,92,231,.15)}
-body.light .tl-yr{color:#6d5ce7}
-body.light .tl-d{color:#44446a}
-body.light .cc{background:#fff;border-color:rgba(0,0,0,.08)}
-body.light .cc:hover{border-color:#6d5ce7;box-shadow:0 6px 20px rgba(109,92,231,.1)}
-body.light .cc-ico{background:rgba(109,92,231,.08)}
-body.light .cc-l{color:#8888aa}
-body.light .cc-v{color:#111128}
-body.light footer{color:#8888aa;border-top-color:rgba(0,0,0,.08)}
-body.light .panel{background:#fff;border-color:rgba(0,0,0,.1);box-shadow:0 12px 40px rgba(0,0,0,.12)}
-body.light .logo{background:linear-gradient(135deg,#6d5ce7,#e879a8);-webkit-background-clip:text;background-clip:text}
-body.light .nav-links{color:#44446a}
-body.light .nbtn{border-color:rgba(0,0,0,.1);color:#44446a}
-body.light .nbtn:hover{background:rgba(109,92,231,.08);border-color:#6d5ce7;color:#6d5ce7}
-body.light .avatar-box{background:linear-gradient(145deg,#fff,#e8e0f0);border-color:rgba(0,0,0,.08)}
-body.light #musicPlayer{background:rgba(255,255,255,.92);border-color:rgba(0,0,0,.1)}
-body.light #musicSelect{color:#111128}
-body.light .dialog-bubble{background:rgba(255,255,255,.75);border-color:rgba(0,0,0,.08);color:#111128}
-body{background:var(--bg);color:var(--tx)}
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-thumb{background:var(--ac3);border-radius:99px}
-.wrap{max-width:960px;margin:0 auto;padding:0 clamp(1.2rem,5vw,2.5rem)}
 
-/* NAV */
-.nav{position:fixed;top:0;left:0;right:0;height:54px;z-index:500;display:flex;align-items:center;transition:background .4s,border .4s}
-.nav.scrolled{background:rgba(7,7,16,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr)}
-body.light .nav.scrolled{background:rgba(244,244,251,.9)}
-.nav .wrap{display:flex;align-items:center;justify-content:space-between;width:100%}
-.logo{font-size:1.05rem;font-weight:900;letter-spacing:.07em;background:linear-gradient(135deg,var(--ac),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.nav-links{display:flex;gap:1.4rem;font-size:.83rem;color:var(--tx2)}
-.nav-links a:hover{color:var(--ac);transition:color .2s}
-.nav-r{display:flex;gap:.35rem}
-.nbtn{background:none;border:1px solid var(--bdr);border-radius:8px;width:30px;height:30px;cursor:pointer;color:var(--tx2);font-size:.85rem;display:flex;align-items:center;justify-content:center;transition:all .2s}
-.nbtn:hover{background:var(--ac2);border-color:var(--ac);color:var(--ac)}
-@media(max-width:620px){.nav-links{display:none}}
-
-/* HERO */
-.hero{position:relative;height:100vh;min-height:580px;overflow:hidden;display:flex;align-items:center;justify-content:center}
-#heroCanvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-.hero-glow{position:absolute;inset:0;background:radial-gradient(ellipse 70% 45% at 50% 88%,rgba(167,139,250,.18),transparent 70%);pointer-events:none}
-.hero-inner{position:relative;z-index:2;text-align:center;padding:0 1.5rem}
-.eyebrow{display:inline-block;font-size:.7rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--ac);border:1px solid rgba(167,139,250,.3);background:rgba(167,139,250,.1);padding:.25rem .85rem;border-radius:999px;margin-bottom:1.3rem;animation:fadeup .7s .1s both}
-.hero-h1{font-size:clamp(2.8rem,8vw,5.2rem);font-weight:900;letter-spacing:-.03em;line-height:1.05;margin-bottom:.8rem;animation:fadeup .7s .25s both}
-.grd{background:linear-gradient(135deg,var(--ac) 0%,var(--pink) 55%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero-sub{color:rgba(255,255,255,.65);font-size:clamp(.9rem,2vw,1.05rem);max-width:380px;margin:0 auto 2rem;animation:fadeup .7s .4s both}
-body.light .hero-sub{color:var(--tx2)}
-.hero-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.5rem;border-radius:10px;background:linear-gradient(135deg,var(--ac),var(--pink));color:#fff;font-size:.88rem;font-weight:700;cursor:pointer;border:none;box-shadow:0 0 32px rgba(167,139,250,.35);transition:transform .2s,box-shadow .2s;animation:fadeup .7s .55s both;text-decoration:none}
-.hero-btn:hover{transform:translateY(-3px);box-shadow:0 10px 36px rgba(167,139,250,.5)}
-.scroll-hint{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:.35rem;font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.25);animation:bob 2.5s ease-in-out infinite}
-.scroll-line{width:1px;height:28px;background:linear-gradient(rgba(255,255,255,.25),transparent)}
-@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
-@keyframes fadeup{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
-
-/* SAKURA PAGE */
-.sakura-page{position:relative;height:100vh;min-height:600px;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;border-top:1px solid var(--bdr)}
-#sakuraCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair}
-.sakura-ui{position:relative;z-index:3;text-align:center;padding-bottom:3rem;pointer-events:none}
-.sakura-msg{font-size:.88rem;color:rgba(255,210,225,.8);letter-spacing:.12em;margin-bottom:.4rem;min-height:1.4em;transition:opacity .5s}
-.sakura-hint{font-size:.68rem;color:rgba(255,180,200,.35);letter-spacing:.15em;text-transform:uppercase}
-
-/* SECTIONS */
-.section{padding:clamp(3rem,7vw,5rem) 0;border-top:1px solid var(--bdr)}
-.sec-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.2em;color:var(--ac);display:block;margin-bottom:.45rem}
-.sec-title{font-size:clamp(1.5rem,3.5vw,2.1rem);font-weight:800;letter-spacing:-.025em;margin-bottom:.35rem}
-.sec-desc{color:var(--tx2);font-size:.93rem;max-width:480px;margin-bottom:2rem}
-
-/* ABOUT */
-.about-wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:2.5rem;align-items:start}
-@media(max-width:700px){.about-wrap{grid-template-columns:1fr}}
-.about-text{color:var(--tx);font-size:.94rem;line-height:1.9;font-weight:400}
-.about-text p+p{margin-top:.75rem}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-top:1.5rem}
-.stat{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--radius);padding:.9rem 1rem;transition:border-color .2s,transform .2s}
-.stat:hover{border-color:var(--bdr2);transform:translateY(-2px)}
-.stat-n{font-size:1.55rem;font-weight:800;background:linear-gradient(135deg,var(--ac),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.stat-l{font-size:.73rem;color:var(--tx3);margin-top:.05rem}
-.avatar-box{background:linear-gradient(145deg,var(--bg2),var(--bg3));border:1px solid var(--bdr);border-radius:20px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:5rem}
-
-/* SKILLS */
-.skills-g{display:grid;grid-template-columns:repeat(6,1fr);gap:.75rem}
-@media(max-width:700px){.skills-g{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:420px){.skills-g{grid-template-columns:repeat(2,1fr)}}
-.sk{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--radius);padding:1.1rem .6rem .9rem;text-align:center;transition:all .3s;overflow:hidden;position:relative}
-.sk::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--ac2),transparent);opacity:0;transition:opacity .3s}
-.sk:hover{transform:translateY(-4px);border-color:var(--ac);box-shadow:0 10px 28px rgba(0,0,0,.3),0 0 0 1px var(--ac)}
-.sk:hover::before{opacity:1}
-.sk-icon{font-size:1.85rem;margin-bottom:.4rem;display:block;position:relative}
-.sk-name{font-size:.8rem;color:var(--tx2);position:relative}
-.sk-bar{margin-top:.5rem;height:3px;background:var(--bg3);border-radius:99px;overflow:hidden}
-.sk-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--ac),var(--pink));transition:width 1.1s cubic-bezier(.22,1,.36,1)}
-
-/* GALLERY */
-.gallery-g{columns:3;column-gap:11px}
-@media(max-width:600px){.gallery-g{columns:2;column-gap:7px}}
-@media(min-width:1100px){.gallery-g{columns:4}}
-.ph-item{break-inside:avoid;margin-bottom:11px;border-radius:12px;overflow:hidden;position:relative;cursor:pointer;background:var(--bg3);transition:transform .3s,box-shadow .3s}
-.ph-item:hover{transform:scale(1.02);box-shadow:0 14px 36px rgba(0,0,0,.45)}
-.ph-inner{width:100%;display:flex;align-items:center;justify-content:center}
-.ph-ov{position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.68) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:.8rem}
-.ph-item:hover .ph-ov{opacity:1}
-.ph-cap{font-size:.78rem;color:#fff;font-weight:600}
-.ph-tag{position:absolute;top:.5rem;right:.5rem;font-size:.62rem;font-weight:700;padding:.13rem .45rem;border-radius:999px;background:rgba(167,139,250,.85);color:#fff}
-
-/* LIGHTBOX */
-.lb{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:900;display:none;align-items:center;justify-content:center;backdrop-filter:blur(16px)}
-.lb.on{display:flex}
-.lb-box{width:min(340px,85vw);height:min(340px,85vw);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:7rem}
-.lb-x{position:fixed;top:1.2rem;right:1.2rem;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:background .2s}
-.lb-x:hover{background:rgba(255,255,255,.22)}
-
-/* TIMELINE */
-.tl{padding-left:26px;position:relative}
-.tl::before{content:'';position:absolute;left:4px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--ac),var(--pink),transparent)}
-.tl-item{position:relative;margin-bottom:2rem}
-.tl-dot{position:absolute;left:-23px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--ac);box-shadow:0 0 12px var(--ac),0 0 0 3px rgba(167,139,250,.2)}
-.tl-yr{font-size:.68rem;font-weight:700;color:var(--ac);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.18rem}
-.tl-t{font-size:1rem;font-weight:700;margin-bottom:.15rem}
-.tl-d{font-size:.9rem;color:var(--tx2)}
-
-/* CONTACT */
-.contact-g{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem}
-@media(max-width:600px){.contact-g{grid-template-columns:1fr}}
-.cc{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--radius);padding:1.2rem;display:flex;align-items:center;gap:.85rem;transition:all .25s}
-.cc:hover{border-color:var(--ac);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.25)}
-.cc-ico{width:42px;height:42px;border-radius:11px;background:var(--ac2);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
-.cc-l{font-size:.72rem;color:var(--tx3);margin-bottom:.1rem}
-.cc-v{font-size:.9rem;font-weight:600}
-
-/* FOOTER */
-footer{text-align:center;padding:2.2rem 0;color:var(--tx3);font-size:.75rem;border-top:1px solid var(--bdr)}
-.heart{color:var(--pink);display:inline-block;animation:pulse 1.5s infinite}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.45)}}
-
-/* PANEL */
-.panel{position:fixed;top:62px;right:1rem;width:190px;background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;padding:.9rem;z-index:600;display:none;box-shadow:0 16px 48px rgba(0,0,0,.4)}
-.panel.on{display:block}
-.ptitle{font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--tx3);margin-bottom:.5rem}
-.panel label{display:flex;justify-content:space-between;font-size:.72rem;color:var(--tx3);margin-bottom:.18rem}
-.panel input[type=range]{width:100%;accent-color:var(--ac);margin-bottom:.55rem;cursor:pointer}
-.scene-row{display:flex;gap:.3rem}
-.sbtn{flex:1;padding:.3rem;border-radius:7px;border:1px solid var(--bdr);background:none;color:var(--tx3);font-size:.8rem;cursor:pointer;transition:all .2s}
-.sbtn.on{background:var(--ac2);border-color:var(--ac);color:var(--ac)}
-
-/* ═══ AMBIENT LAYER ═══ */
-.ambient-layer{position:absolute;inset:0;z-index:0;overflow:hidden}
-.moon-glow{position:absolute;top:8%;right:10%;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(255,245,225,.12) 0%,rgba(255,240,220,.04) 40%,transparent 72%);filter:blur(6px);animation:moonBreath 7s ease-in-out infinite}
-@keyframes moonBreath{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.08);opacity:1}}
-.mist{position:absolute;width:160%;height:240px;left:-20%;filter:blur(50px);opacity:.12}
-.mist-1{bottom:0;background:linear-gradient(90deg,rgba(255,180,220,.2),rgba(180,140,255,.15),rgba(255,180,220,.2));animation:mistMove1 18s linear infinite}
-.mist-2{bottom:80px;background:linear-gradient(90deg,rgba(180,140,255,.15),rgba(255,180,220,.2),rgba(180,140,255,.15));animation:mistMove2 24s linear infinite}
-@keyframes mistMove1{from{transform:translateX(0)}to{transform:translateX(-10%)}}
-@keyframes mistMove2{from{transform:translateX(-8%)}to{transform:translateX(0)}}
-.sakura-page::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at center,transparent 40%,rgba(0,0,0,.28) 100%);animation:sceneBreath 8s ease-in-out infinite;pointer-events:none;z-index:4}
-@keyframes sceneBreath{0%,100%{opacity:.7}50%{opacity:1}}
-.sakura-title{font-size:clamp(2rem,5vw,4rem);font-weight:900;letter-spacing:.15em;color:#fff;text-shadow:0 0 40px rgba(255,180,220,.25);margin-bottom:.3rem}
-.sakura-sub{font-size:.8rem;letter-spacing:.5em;color:rgba(255,220,235,.55);margin-bottom:1.3rem}
-#sidePetals{position:absolute;inset:0;pointer-events:none;z-index:1}
-.side-petal{position:absolute;font-size:18px;opacity:.12;filter:blur(.5px);animation:sideFloat linear forwards}
-@keyframes sideFloat{from{transform:translateY(-10vh) translateX(0) rotate(0deg)}to{transform:translateY(110vh) translateX(80px) rotate(360deg)}}
-#dialogLayer{position:absolute;inset:0;pointer-events:none;z-index:10}
-.dialog-bubble{position:absolute;max-width:240px;padding:.8rem 1rem;border-radius:18px;backdrop-filter:blur(20px);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#fff;font-size:.82rem;line-height:1.6;animation:bubbleFade 5s forwards ease-out}
-@keyframes bubbleFade{0%{opacity:0;transform:translateY(18px) scale(.95)}12%{opacity:1;transform:translateY(0) scale(1)}80%{opacity:1}100%{opacity:0;transform:translateY(-45px) scale(1.02)}}
-</style>
+    </style>
+    <script src="/assets/js/tailwind.browser.js"></script>
+    <script src="/assets/js/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--yd-background);
+    --color-foreground: var(--yd-foreground);
+    --color-card: var(--yd-card);
+    --color-card-foreground: var(--yd-card-foreground);
+    --color-popover: var(--yd-popover);
+    --color-popover-foreground: var(--yd-popover-foreground);
+    --color-primary: var(--yd-primary);
+    --color-primary-foreground: var(--yd-primary-foreground);
+    --color-muted: var(--yd-muted);
+    --color-muted-foreground: var(--yd-muted-foreground);
+    --color-border: var(--yd-border);
+    --color-input: var(--yd-input);
+    --color-ring: var(--yd-ring);
+    --radius-sm: var(--yd-radius-sm);
+    --radius-md: var(--yd-radius-md);
+    --radius-lg: var(--yd-radius-lg);
+  }
+  @layer base {
+    body { background: var(--yd-background); color: var(--yd-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--yd-background); }
+      .text-background { color: var(--yd-background); }
+      .border-background { border-color: var(--yd-background); }
+      .ring-background { --tw-ring-color: var(--yd-background); }
+      .bg-foreground { background-color: var(--yd-foreground); }
+      .text-foreground { color: var(--yd-foreground); }
+      .border-foreground { border-color: var(--yd-foreground); }
+      .ring-foreground { --tw-ring-color: var(--yd-foreground); }
+      .bg-card { background-color: var(--yd-card); }
+      .text-card { color: var(--yd-card); }
+      .border-card { border-color: var(--yd-card); }
+      .ring-card { --tw-ring-color: var(--yd-card); }
+      .bg-card-foreground { background-color: var(--yd-card-foreground); }
+      .text-card-foreground { color: var(--yd-card-foreground); }
+      .border-card-foreground { border-color: var(--yd-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--yd-card-foreground); }
+      .bg-popover { background-color: var(--yd-popover); }
+      .text-popover { color: var(--yd-popover); }
+      .border-popover { border-color: var(--yd-popover); }
+      .ring-popover { --tw-ring-color: var(--yd-popover); }
+      .bg-popover-foreground { background-color: var(--yd-popover-foreground); }
+      .text-popover-foreground { color: var(--yd-popover-foreground); }
+      .border-popover-foreground { border-color: var(--yd-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--yd-popover-foreground); }
+      .bg-primary { background-color: var(--yd-primary); }
+      .text-primary { color: var(--yd-primary); }
+      .border-primary { border-color: var(--yd-primary); }
+      .ring-primary { --tw-ring-color: var(--yd-primary); }
+      .bg-primary-foreground { background-color: var(--yd-primary-foreground); }
+      .text-primary-foreground { color: var(--yd-primary-foreground); }
+      .border-primary-foreground { border-color: var(--yd-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--yd-primary-foreground); }
+      .bg-muted { background-color: var(--yd-muted); }
+      .text-muted { color: var(--yd-muted); }
+      .border-muted { border-color: var(--yd-muted); }
+      .ring-muted { --tw-ring-color: var(--yd-muted); }
+      .bg-muted-foreground { background-color: var(--yd-muted-foreground); }
+      .text-muted-foreground { color: var(--yd-muted-foreground); }
+      .border-muted-foreground { border-color: var(--yd-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--yd-muted-foreground); }
+      .bg-border { background-color: var(--yd-border); }
+      .text-border { color: var(--yd-border); }
+      .border-border { border-color: var(--yd-border); }
+      .ring-border { --tw-ring-color: var(--yd-border); }
+      .bg-input { background-color: var(--yd-input); }
+      .text-input { color: var(--yd-input); }
+      .border-input { border-color: var(--yd-input); }
+      .ring-input { --tw-ring-color: var(--yd-input); }
+      .bg-ring { background-color: var(--yd-ring); }
+      .text-ring { color: var(--yd-ring); }
+      .border-ring { border-color: var(--yd-ring); }
+      .ring-ring { --tw-ring-color: var(--yd-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
 </head>
-<body>
+<body class="min-h-screen bg-background text-foreground font-sans antialiased selection:bg-primary selection:text-primary-foreground">
+  <div class="progress-bar" id="scrollProgress"></div>
 
-<!-- NAV -->
-<nav class="nav" id="nav">
-  <div class="wrap">
-    <div class="logo">YADONG</div>
-    <div class="nav-links">
-      <a href="#home">首页</a>
-      <a href="#sakura">🌸 樱花</a>
-      <a href="#about">关于我</a>
-      <a href="#skills">技能</a>
-      <a href="#gallery">照片</a>
-      <a href="#contact">联系</a>
-      <a href="#gesture-galaxy">🌌 手势星系</a>
-      <a href="#iss-radar">🛰️ ISS 雷达</a>
-    </div>
-    <div class="nav-r">
-      <a href="galaxy/" target="_blank" class="nbtn" title="手势星系" style="text-decoration:none;line-height:1">🌌</a>
-      <button class="nbtn" id="themeBtn" onclick="toggleTheme()" title="切换主题">🌙</button>
-      <button class="nbtn" id="animBtn" onclick="toggleHeroAnim()" title="暂停动画">▶</button>
-      <button class="nbtn" onclick="document.getElementById('panel').classList.toggle('on')" title="设置">⚙</button>
-    </div>
-  </div>
-</nav>
-
-<!-- SETTINGS -->
-<div class="panel" id="panel">
-  <div class="ptitle">首屏动画</div>
-  <label>花瓣数量 <span id="vP">80</span></label>
-  <input type="range" min="20" max="150" step="5" value="80" oninput="rebuildHeroPetals(+this.value);document.getElementById('vP').textContent=this.value">
-  <label>风力 <span id="vW">0.5</span></label>
-  <input type="range" min="0" max="2" step=".1" value=".5" oninput="heroWind=+this.value;document.getElementById('vW').textContent=(+this.value).toFixed(1)">
-  <div class="ptitle" style="margin-top:.4rem">场景</div>
-  <div class="scene-row">
-    <button class="sbtn on" onclick="setHeroScene('cherry',this)">🌸</button>
-    <button class="sbtn" onclick="setHeroScene('autumn',this)">🍂</button>
-    <button class="sbtn" onclick="setHeroScene('snow',this)">❄</button>
-  </div>
-</div>
-
-<!-- HERO -->
-<section class="hero" id="home">
-  <canvas id="heroCanvas"></canvas>
-  <div class="hero-glow"></div>
-  <div class="hero-inner">
-    <div class="eyebrow">✦ 欢迎来到我的空间</div>
-    <h1 class="hero-h1">Hi, I'm<br><span class="grd">Yadong</span></h1>
-    <p class="hero-sub">写代码的，偶尔也写点别的。<br>喜欢折腾，喜欢把想法变成现实。</p>
-    <a href="#about" class="hero-btn">了解更多 ↓</a>
-  </div>
-  <div class="scroll-hint"><div class="scroll-line"></div><span>SCROLL</span></div>
-</section>
-
-<!-- MY PROJECTS -->
-<section class="section" id="projects"><div class="wrap">
-  <span class="sec-label">Creative Projects</span>
-  <h2 class="sec-title">🛠️ 我的项目</h2>
-  <p class="sec-desc">用前端技术做的交互实验，纯浏览器打开即玩，无需安装任何东西。</p>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:2.5rem">
-
-    <!-- Gesture Galaxy -->
-    <div style="border-radius:16px;border:1px solid rgba(79,255,255,.15);background:rgba(79,255,255,.03);padding:2rem;transition:border-color .3s" onmouseover="this.style.borderColor='rgba(79,255,255,.4)'" onmouseout="this.style.borderColor='rgba(79,255,255,.15)'">
-      <div style="font-size:2.5rem;margin-bottom:.8rem">🌌</div>
-      <h3 style="font-size:1.15rem;color:#4ff;margin-bottom:.5rem">手势星系</h3>
-      <p style="color:var(--tx2);font-size:.88rem;line-height:1.7;margin-bottom:1.2rem">通过摄像头捕捉手部动作，用手指旋转、缩放、点击来操控 3D 粒子星系。11 种形态、双手交互。</p>
-      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.2rem">
-        <span style="padding:.25rem .6rem;border-radius:999px;background:rgba(79,255,255,.08);border:1px solid rgba(79,255,255,.2);font-size:.7rem;color:#4ff">MediaPipe</span>
-        <span style="padding:.25rem .6rem;border-radius:999px;background:rgba(79,255,255,.08);border:1px solid rgba(79,255,255,.2);font-size:.7rem;color:#4ff">Three.js</span>
-        <span style="padding:.25rem .6rem;border-radius:999px;background:rgba(79,255,255,.08);border:1px solid rgba(79,255,255,.2);font-size:.7rem;color:#4ff">WebGL</span>
+  <main>
+    <!-- Nav -->
+    <nav class="fixed top-0 inset-x-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-md">
+      <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="#hero" class="text-lg font-semibold tracking-tight text-foreground">Yadong<span class="text-primary">.</span></a>
+        <div class="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
+          <a href="#about" class="hover:text-primary transition-colors">关于</a>
+          <a href="#capabilities" class="hover:text-primary transition-colors">能力</a>
+          <a href="#projects" class="hover:text-primary transition-colors">项目</a>
+          <a href="#gallery" class="hover:text-primary transition-colors">影像</a>
+          <a href="#moments" class="hover:text-primary transition-colors">日常</a>
+          <a href="#contact" class="hover:text-primary transition-colors">联系</a>
+        </div>
+        <a href="#contact" class="hidden md:inline-flex items-center gap-2 text-sm px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+          <i data-lucide="send" class="w-4 h-4"></i>
+          <span>联系我</span>
+        </a>
       </div>
-      <a href="galaxy/" target="_blank" style="display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:8px;background:linear-gradient(135deg,rgba(79,255,255,.12),rgba(100,200,255,.06));border:1px solid rgba(79,255,255,.3);color:#4ff;font-size:.82rem;font-weight:600;text-decoration:none;transition:all .3s" onmouseover="this.style.background='rgba(79,255,255,.22)'" onmouseout="this.style.background='linear-gradient(135deg,rgba(79,255,255,.12),rgba(100,200,255,.06))'">✨ 启动手势星系 →</a>
-    </div>
+    </nav>
 
-    <!-- ISS Space Radar -->
-    <div style="border-radius:16px;border:1px solid rgba(0,255,204,.15);background:rgba(0,255,204,.03);padding:2rem;transition:border-color .3s" onmouseover="this.style.borderColor='rgba(0,255,204,.4)'" onmouseout="this.style.borderColor='rgba(0,255,204,.15)'">
-      <div style="font-size:2.5rem;margin-bottom:.8rem">🛰️</div>
-      <h3 style="font-size:1.15rem;color:#00ffcc;margin-bottom:.5rem">ISS 太空雷达</h3>
-      <p style="color:var(--tx2);font-size:.88rem;line-height:1.7;margin-bottom:1.2rem">基于 TLE 轨道数据实时计算卫星位置，3D 地球 + 8 颗在轨卫星。拖动旋转、缩放、点击标记查看详情。</p>
-      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.2rem">
-        <span style="padding:.25rem .6rem;border-radius:999px;background:rgba(0,255,204,.08);border:1px solid rgba(0,255,204,.2);font-size:.7rem;color:#00ffcc">Three.js</span>
-        <span style="padding:.25rem .6rem;border-radius:999px;background:rgba(0,255,204,.08);border:1px solid rgba(0,255,204,.2);font-size:.7rem;color:#00ffcc">TLE 轨道</span>
-        <span style="padding:.25rem .6rem;border-radius:999px;background:rgba(0,255,204,.08);border:1px solid rgba(0,255,204,.2);font-size:.7rem;color:#00ffcc">SGP4</span>
+    <!-- Hero -->
+    <section id="hero" class="relative min-h-screen flex items-center hero-bg overflow-clip">
+      <div class="sakura-petal" style="left:8%; animation-duration:12s; animation-delay:0s;"></div>
+      <div class="sakura-petal" style="left:22%; animation-duration:16s; animation-delay:2s;"></div>
+      <div class="sakura-petal" style="left:38%; animation-duration:14s; animation-delay:1s;"></div>
+      <div class="sakura-petal" style="left:62%; animation-duration:18s; animation-delay:3s;"></div>
+      <div class="sakura-petal" style="left:78%; animation-duration:13s; animation-delay:4s;"></div>
+      <div class="sakura-petal" style="left:90%; animation-duration:15s; animation-delay:1.5s;"></div>
+
+      <!-- Blueprint decorative layer -->
+      <div class="absolute inset-0 pointer-events-none opacity-30">
+        <svg class="absolute top-[15%] left-[8%] w-32 h-32 text-primary/40" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="0.5">
+          <circle cx="50" cy="50" r="48"/>
+          <line x1="50" y1="2" x2="50" y2="98"/>
+          <line x1="2" y1="50" x2="98" y2="50"/>
+        </svg>
+        <svg class="absolute bottom-[20%] right-[10%] w-48 h-48 text-primary/30" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="0.5">
+          <rect x="10" y="10" width="80" height="80"/>
+          <line x1="10" y1="10" x2="90" y2="90"/>
+          <line x1="90" y1="10" x2="10" y2="90"/>
+        </svg>
       </div>
-      <a href="iss-space-radar.html" target="_blank" style="display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:8px;background:linear-gradient(135deg,rgba(0,255,204,.12),rgba(100,200,255,.06));border:1px solid rgba(0,255,204,.3);color:#00ffcc;font-size:.82rem;font-weight:600;text-decoration:none;transition:all .3s" onmouseover="this.style.background='rgba(0,255,204,.22)'" onmouseout="this.style.background='linear-gradient(135deg,rgba(0,255,204,.12),rgba(100,200,255,.06))'">🚀 打开 ISS 太空雷达 →</a>
-    </div>
 
-  </div>
-</div></section>
+      <div class="relative z-10 max-w-6xl mx-auto px-6 pt-24 pb-16">
+        <div class="max-w-3xl">
+          <p class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/30 bg-primary/10 text-primary text-sm mb-6 reveal">
+            <i data-lucide="compass" class="w-4 h-4"></i>
+            <span>兰州交通大学 · 土木工程 · 大四</span>
+          </p>
+          <h1 class="text-5xl md:text-7xl font-bold tracking-tight text-foreground text-shadow-hero mb-6 reveal">
+            土木 <span class="text-primary">×</span> AI
+          </h1>
+          <p class="text-xl md:text-2xl text-foreground/80 text-shadow-hero leading-relaxed mb-8 reveal">
+            在结构里写算法，在数据里建桥梁。<br class="hidden md:block">
+            把工程经验变成可计算、可感知、可复用的智能系统。
+          </p>
+          <div class="flex flex-wrap gap-4 reveal">
+            <a href="#projects" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+              <span>看作品</span>
+              <i data-lucide="arrow-down-right" class="w-4 h-4"></i>
+            </a>
+            <a href="#about" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border bg-card/50 text-foreground hover:bg-card transition-colors">
+              <span>了解我</span>
+            </a>
+          </div>
 
-<!-- ═══ SAKURA INTERACTIVE ═══ -->
-<section class="sakura-page" id="sakura">
-  <div class="ambient-layer">
-    <div class="moon-glow"></div>
-    <div class="mist mist-1"></div>
-    <div class="mist mist-2"></div>
-  </div>
-  <div id="sidePetals"></div>
-  <canvas id="sakuraCanvas"></canvas>
-  <div id="dialogLayer"></div>
-  <div id="scrollBar" style="position:fixed;right:.6rem;top:50%;transform:translateY(-50%);width:6px;height:180px;background:rgba(255,255,255,.06);border-radius:99px;z-index:500;overflow:hidden;cursor:pointer" onclick="scrollToNext(event)"><div id="scrollThumb" style="width:100%;height:0%;background:linear-gradient(180deg,#f472b6,#a78bfa);border-radius:99px;transition:height .15s"></div></div>
-  <div class="sakura-ui">
-    <div class="sakura-title">一期一会</div>
-    <div class="sakura-sub">ICHIGO ICHIE</div>
-    <div class="sakura-msg" id="sakuraMsg">🌸 点击树枝，让风带走花瓣</div>
-    <div class="sakura-hint">MOVE MOUSE · CLICK BRANCHES · FEEL THE NIGHT</div>
-    <div style="margin-top:1.5rem;pointer-events:auto">
-
-    </div>
-  </div>
-</section>
-
-<!-- MUSIC PLAYER -->
-<div id="musicPlayer" style="position:fixed;bottom:1.5rem;left:1.5rem;z-index:600;display:flex;align-items:center;gap:.7rem;background:rgba(13,13,28,.88);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:.65rem 1.1rem;opacity:0;transform:translateY(10px);transition:all .4s;box-shadow:0 8px 32px rgba(0,0,0,.4)">
-  <button id="musicToggle" onclick="toggleMusic()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#f472b6">🎵</button>
-  <select id="musicSelect" onchange="switchMusic()" style="background:transparent;border:none;color:rgba(255,255,255,.8);font-size:.85rem;cursor:pointer;outline:none;font-family:inherit;max-width:180px">
-    <option value="assets/bgm1.mp3" style="background:#1a1a2e">告白气球 - 周杰伦</option>
-    <option value="assets/bgm2.mp3" style="background:#1a1a2e">迷失幻境 - IN-K</option>
-  </select>
-  <audio id="bgm" loop preload="auto"></audio>
-</div>
-
-<!-- ABOUT -->
-<section class="section" id="about"><div class="wrap">
-  <span class="sec-label">About Me</span>
-  <h2 class="sec-title">关于我</h2>
-  <div class="about-wrap">
-    <div>
-      <div class="about-text">
-        <p>你好！我是 Yadong，一个热爱技术和创造的人。平时喜欢写代码、研究各种有趣的工具和项目。</p>
-        <p>不是专业的 AI 研究员，只是对这些东西感兴趣，觉得好玩就去折腾了。也喜欢拍照、发呆、看云。</p>
-        <p>我相信好的工具能让生活更高效，所以总是在造轮子的路上。</p>
+          <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 reveal">
+            <div>
+              <p class="text-3xl font-bold text-primary"><span class="counter" data-target="3">0</span>+</p>
+              <p class="text-sm text-muted-foreground">年工程学习</p>
+            </div>
+            <div>
+              <p class="text-3xl font-bold text-primary"><span class="counter" data-target="4">0</span></p>
+              <p class="text-sm text-muted-foreground">实战项目</p>
+            </div>
+            <div>
+              <p class="text-3xl font-bold text-primary"><span class="counter" data-target="87">0</span>%</p>
+              <p class="text-sm text-muted-foreground">审图 mAP</p>
+            </div>
+            <div>
+              <p class="text-3xl font-bold text-primary"><span class="counter" data-target="1200">0</span>+</p>
+              <p class="text-sm text-muted-foreground">标注样本</p>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="stats">
-        <div class="stat"><div class="stat-n">3+</div><div class="stat-l">年开发经验</div></div>
-        <div class="stat"><div class="stat-n">10+</div><div class="stat-l">完成项目</div></div>
-        <div class="stat"><div class="stat-n">∞</div><div class="stat-l">好奇心</div></div>
-        <div class="stat"><div class="stat-n">☕</div><div class="stat-l">续命中</div></div>
+
+      <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-muted-foreground/60 animate-bounce">
+        <i data-lucide="chevron-down" class="w-6 h-6"></i>
       </div>
-    </div>
+    </section>
 
+    <!-- About -->
+    <section id="about" class="py-24 md:py-32 blueprint-bg">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="grid lg:grid-cols-2 gap-12 items-start">
+          <div class="reveal">
+            <p class="text-primary font-medium mb-2">关于我</p>
+            <h2 class="text-3xl md:text-4xl font-bold tracking-tight mb-6">
+              不是“转码”的土木生，<br>
+              而是<span class="text-primary">会用 AI 解决工程问题</span>的建造者。
+            </h2>
+            <div class="space-y-4 text-muted-foreground leading-relaxed mb-10">
+              <p>
+                在兰州交通大学土木工程专业三年的学习中，我不仅掌握了结构力学、混凝土与钢结构设计，也自学了 Python、计算机视觉与全栈开发。
+              </p>
+              <p>
+                我相信土木工程的未来不是“被 AI 替代”，而是被 AI 放大：从图纸审查到参数化建模，从监测数据到风险预测，懂工程的人才是让算法落地的关键。
+              </p>
+              <p>
+                除了代码和图纸，我也喜欢摄影、音乐和樱花季里的慢节奏——这个主页就是它们共同的样子。
+              </p>
+            </div>
+
+            <!-- Timeline -->
+            <div class="relative border-l border-border pl-6 space-y-8">
+              <div class="relative">
+                <span class="absolute -left-[31px] top-1 w-3 h-3 rounded-full bg-primary ring-4 ring-background"></span>
+                <p class="text-sm text-primary font-medium">2022.09</p>
+                <h4 class="font-semibold">入学兰州交通大学</h4>
+                <p class="text-sm text-muted-foreground">土木工程本科专业，开始系统学习结构、材料与施工。</p>
+              </div>
+              <div class="relative">
+                <span class="absolute -left-[31px] top-1 w-3 h-3 rounded-full bg-primary/60 ring-4 ring-background"></span>
+                <p class="text-sm text-primary font-medium">2023.06</p>
+                <h4 class="font-semibold">自学编程与数据分析</h4>
+                <p class="text-sm text-muted-foreground">Python、NumPy、Matplotlib，尝试把课程数据自动化处理。</p>
+              </div>
+              <div class="relative">
+                <span class="absolute -left-[31px] top-1 w-3 h-3 rounded-full bg-primary/60 ring-4 ring-background"></span>
+                <p class="text-sm text-primary font-medium">2024.03</p>
+                <h4 class="font-semibold">第一个 CV 审图项目</h4>
+                <p class="text-sm text-muted-foreground">用 YOLO 做结构图纸构件检测，意识到工程 + AI 的交叉价值。</p>
+              </div>
+              <div class="relative">
+                <span class="absolute -left-[31px] top-1 w-3 h-3 rounded-full bg-primary ring-4 ring-background"></span>
+                <p class="text-sm text-primary font-medium">2025.03</p>
+                <h4 class="font-semibold">BIM 语义搜索与主页重构</h4>
+                <p class="text-sm text-muted-foreground">探索 IFC 向量检索，同时用新版个人主页沉淀学习与项目。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-8 reveal">
+            <div class="p-6 rounded-2xl bg-card border border-border">
+              <h3 class="font-semibold mb-6 flex items-center gap-2">
+                <i data-lucide="bar-chart-3" class="w-5 h-5 text-primary"></i>
+                技能熟练度
+              </h3>
+              <div class="space-y-5">
+                <div>
+                  <div class="flex justify-between text-sm mb-2">
+                    <span>Python / 数据分析</span>
+                    <span class="text-muted-foreground">85%</span>
+                  </div>
+                  <div class="skill-track"><div class="skill-fill" data-width="85"></div></div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-sm mb-2">
+                    <span>计算机视觉 / OpenCV</span>
+                    <span class="text-muted-foreground">75%</span>
+                  </div>
+                  <div class="skill-track"><div class="skill-fill" data-width="75"></div></div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-sm mb-2">
+                    <span>PyTorch / 深度学习</span>
+                    <span class="text-muted-foreground">70%</span>
+                  </div>
+                  <div class="skill-track"><div class="skill-fill" data-width="70"></div></div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-sm mb-2">
+                    <span>结构分析与设计</span>
+                    <span class="text-muted-foreground">85%</span>
+                  </div>
+                  <div class="skill-track"><div class="skill-fill" data-width="85"></div></div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-sm mb-2">
+                    <span>AutoCAD / BIM</span>
+                    <span class="text-muted-foreground">80%</span>
+                  </div>
+                  <div class="skill-track"><div class="skill-fill" data-width="80"></div></div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-sm mb-2">
+                    <span>Web 前端 / 可视化</span>
+                    <span class="text-muted-foreground">65%</span>
+                  </div>
+                  <div class="skill-track"><div class="skill-fill" data-width="65"></div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="p-5 rounded-2xl bg-card border border-border flex items-center gap-3">
+                <i data-lucide="graduation-cap" class="w-6 h-6 text-primary"></i>
+                <div>
+                  <p class="font-semibold text-sm">土木工程</p>
+                  <p class="text-xs text-muted-foreground">结构 / 材料</p>
+                </div>
+              </div>
+              <div class="p-5 rounded-2xl bg-card border border-border flex items-center gap-3">
+                <i data-lucide="brain-circuit" class="w-6 h-6 text-primary"></i>
+                <div>
+                  <p class="font-semibold text-sm">人工智能</p>
+                  <p class="text-xs text-muted-foreground">CV / NLP</p>
+                </div>
+              </div>
+              <div class="p-5 rounded-2xl bg-card border border-border flex items-center gap-3">
+                <i data-lucide="code-2" class="w-6 h-6 text-primary"></i>
+                <div>
+                  <p class="font-semibold text-sm">全栈开发</p>
+                  <p class="text-xs text-muted-foreground">Web / 脚本</p>
+                </div>
+              </div>
+              <div class="p-5 rounded-2xl bg-card border border-border flex items-center gap-3">
+                <i data-lucide="camera" class="w-6 h-6 text-primary"></i>
+                <div>
+                  <p class="font-semibold text-sm">影像记录</p>
+                  <p class="text-xs text-muted-foreground">建筑 / 城市</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Capabilities -->
+    <section id="capabilities" class="py-24 md:py-32 bg-background">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="max-w-2xl mb-16 reveal">
+          <p class="text-primary font-medium mb-2">能力图谱</p>
+          <h2 class="text-3xl md:text-4xl font-bold tracking-tight mb-4">工程 + AI 的交叉技能</h2>
+          <p class="text-muted-foreground">从物理世界的问题出发，用数据和算法寻找工程最优解。</p>
+        </div>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="group p-6 rounded-2xl bg-card border border-border hover:border-primary/40 transition-colors reveal">
+            <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+              <i data-lucide="building-2" class="w-6 h-6 text-primary"></i>
+            </div>
+            <h3 class="text-lg font-semibold mb-2">结构分析与设计</h3>
+            <p class="text-sm text-muted-foreground leading-relaxed mb-4">结构力学、混凝土/钢结构、BIM 建模与施工图识读，能把图纸语言转化为计算问题。</p>
+            <div class="flex flex-wrap gap-2">
+              <span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">AutoCAD</span>
+              <span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">PKPM</span>
+              <span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">Revit</span>
+            </div>
+          </div>
+          <div class="group p-6 rounded-2xl bg-card border border-border hover:border-primary/40 transition-colors reveal">
+            <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+              <i data-lucide="scan-eye" class="w-6 h-6 text-primary"></i>
+            </div>
+            <h3 class="text-lg font-semibold mb-2">计算机视觉审图</h3>
+            <p class="text-sm text-muted-foreground leading-relaxed mb-4">基于 YOLO / DETR 的结构图纸目标检测与标注，自动识别构件、尺寸与配筋信息。</p>
+            <div class="flex flex-wrap gap-2">
+              <span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">Python</span>
+              <span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">OpenCV</span>
+              <span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">YOLO</span>
+            </div>
+          </div>
+          <div class="group p-6 rounded-2xl bg-card border border-border hover:border-primary/40 transition-colors reveal">
+            <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+              <i data-lucide="database" class="w-6 h-6 text-primary"></i>
+            </div>
+            <h3 class="text-lg font-semibold mb-2">BIM 语义搜索</h3>
+            <p class="text-sm text-muted-foreground leading-relaxed mb-4">将 IFC / 构件数据嵌入向量数据库，实现自然语言检索构件属性与图纸关联。</p>
+            <div class="flex flex-wrap gap-2">
+              <span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">RAG</span>
+              <span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">Vector DB</span>
+              <span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">IFC</span>
+            </div>
+          </div>
+          <div class="group p-6 rounded-2xl bg-card border border-border hover:border-primary/40 transition-colors reveal">
+            <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+              <i data-lucide="activity" class="w-6 h-6 text-primary"></i>
+            </div>
+            <h3 class="text-lg font-semibold mb-2">监测数据分析</h3>
+            <p class="text-sm text-muted-foreground leading-relaxed mb-4">处理位移、应力、振动等传感器数据，进行时序预测与异常检测，辅助结构安全评估。</p>
+            <div class="flex flex-wrap gap-2">
+              <span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">Pandas</span>
+              <span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">NumPy</span>
+              <span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">时序模型</span>
+            </div>
+          </div>
+          <div class="group p-6 rounded-2xl bg-card border border-border hover:border-primary/40 transition-colors reveal">
+            <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+              <i data-lucide="terminal" class="w-6 h-6 text-primary"></i>
+            </div>
+            <h3 class="text-lg font-semibold mb-2">工程工具开发</h3>
+            <p class="text-sm text-muted-foreground leading-relaxed mb-4">Python / JS 自动化脚本、参数化建模工具、Web 可视化看板，让重复工作自动完成。</p>
+            <div class="flex flex-wrap gap-2">
+              <span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">FastAPI</span>
+              <span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">Tailwind</span>
+              <span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">Rhino/Grasshopper</span>
+            </div>
+          </div>
+          <div class="group p-6 rounded-2xl bg-card border border-border hover:border-primary/40 transition-colors reveal">
+            <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+              <i data-lucide="git-branch" class="w-6 h-6 text-primary"></i>
+            </div>
+            <h3 class="text-lg font-semibold mb-2">快速学习与协作</h3>
+            <p class="text-sm text-muted-foreground leading-relaxed mb-4">熟悉 Git、敏捷开发与技术写作，能把复杂方案用工程师和开发团队都懂的语言表达。</p>
+            <div class="flex flex-wrap gap-2">
+              <span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">Git</span>
+              <span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">Markdown</span>
+              <span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">Figma</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Projects -->
+    <section id="projects" class="py-24 md:py-32 blueprint-bg">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="max-w-2xl mb-16 reveal">
+          <p class="text-primary font-medium mb-2">项目与实验</p>
+          <h2 class="text-3xl md:text-4xl font-bold tracking-tight mb-4">把土木问题，做成 AI 原型</h2>
+          <p class="text-muted-foreground">既有面向工程场景的实战项目，也有探索技术的个人实验。</p>
+        </div>
+        <div class="grid md:grid-cols-2 gap-6">
+          <article class="rounded-2xl overflow-hidden bg-card border border-border group reveal">
+            <div class="aspect-video overflow-clip">
+              <img src="assets/project-structural-ai.jpg" alt="智能结构审图系统" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+            </div>
+            <div class="p-6">
+              <div class="flex items-center gap-2 text-xs text-primary mb-3">
+                <span class="px-2 py-1 rounded bg-primary/10">计算机视觉</span>
+                <span class="px-2 py-1 rounded bg-primary/10">结构图纸</span>
+              </div>
+              <h3 class="text-xl font-semibold mb-2">智能结构审图系统</h3>
+              <p class="text-sm text-muted-foreground leading-relaxed mb-4">
+                基于目标检测的结构施工图纸自动审图工具，可识别梁、柱、节点与配筋标注，输出审查清单与问题定位。
+              </p>
+              <ul class="text-sm text-muted-foreground space-y-1 mb-4 list-disc list-inside">
+                <li>标注 1200+ 张结构图纸样本</li>
+                <li>支持梁、柱、节点、尺寸线 4 类目标</li>
+                <li>输出 JSON 审图报告与可视化标注图</li>
+              </ul>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4 text-sm text-muted-foreground">
+                  <span class="inline-flex items-center gap-1"><i data-lucide="layers" class="w-4 h-4"></i> YOLOv8</span>
+                  <span class="inline-flex items-center gap-1"><i data-lucide="bar-chart-2" class="w-4 h-4"></i> mAP 0.87</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <a href="#" class="p-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors" title="GitHub"><i data-lucide="github" class="w-4 h-4"></i></a>
+                  <a href="#" class="p-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors" title="Demo"><i data-lucide="external-link" class="w-4 h-4"></i></a>
+                </div>
+              </div>
+            </div>
+          </article>
+          <article class="rounded-2xl overflow-hidden bg-card border border-border group reveal">
+            <div class="aspect-video overflow-clip">
+              <img src="assets/project-bim-search.jpg" alt="BIM 语义搜索引擎" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+            </div>
+            <div class="p-6">
+              <div class="flex items-center gap-2 text-xs text-primary mb-3">
+                <span class="px-2 py-1 rounded bg-primary/10">NLP</span>
+                <span class="px-2 py-1 rounded bg-primary/10">BIM</span>
+              </div>
+              <h3 class="text-xl font-semibold mb-2">BIM 语义搜索引擎</h3>
+              <p class="text-sm text-muted-foreground leading-relaxed mb-4">
+                提取 IFC 构件属性并生成语义向量，支持自然语言查询构件、材料与空间关系，降低非专业人员检索门槛。
+              </p>
+              <ul class="text-sm text-muted-foreground space-y-1 mb-4 list-disc list-inside">
+                <li>解析 IFC 构件属性与几何关系</li>
+                <li>嵌入向量数据库，支持语义相似度检索</li>
+                <li>Web 问答界面，返回构件来源与图纸</li>
+              </ul>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4 text-sm text-muted-foreground">
+                  <span class="inline-flex items-center gap-1"><i data-lucide="search" class="w-4 h-4"></i> RAG</span>
+                  <span class="inline-flex items-center gap-1"><i data-lucide="box" class="w-4 h-4"></i> Chroma</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <a href="#" class="p-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors" title="GitHub"><i data-lucide="github" class="w-4 h-4"></i></a>
+                  <a href="#" class="p-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors" title="Demo"><i data-lucide="external-link" class="w-4 h-4"></i></a>
+                </div>
+              </div>
+            </div>
+          </article>
+          <article class="rounded-2xl bg-card border border-border p-6 reveal">
+            <div class="flex items-start justify-between mb-4">
+              <div class="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
+                <i data-lucide="hand" class="w-6 h-6 text-primary"></i>
+              </div>
+              <span class="text-xs text-muted-foreground">实验项目</span>
+            </div>
+            <h3 class="text-lg font-semibold mb-2">Gesture Galaxy</h3>
+            <p class="text-sm text-muted-foreground leading-relaxed mb-4">
+              基于手势识别的交互式星系探索演示。用 MediaPipe 捕捉手部关键点，控制镜头在 3D 星云中漫游，锻炼实时交互与可视化能力。
+            </p>
+            <div class="flex items-center gap-2">
+              <span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">MediaPipe</span>
+              <span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">Three.js</span>
+              <a href="#" class="p-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors ml-auto" title="GitHub"><i data-lucide="github" class="w-4 h-4"></i></a>
+            </div>
+          </article>
+          <article class="rounded-2xl bg-card border border-border p-6 reveal">
+            <div class="flex items-start justify-between mb-4">
+              <div class="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
+                <i data-lucide="satellite" class="w-6 h-6 text-primary"></i>
+              </div>
+              <span class="text-xs text-muted-foreground">实验项目</span>
+            </div>
+            <h3 class="text-lg font-semibold mb-2">ISS Radar</h3>
+            <p class="text-sm text-muted-foreground leading-relaxed mb-4">
+              国际空间站轨道追踪面板。调用公开 API 获取实时 TLE 数据，用 Canvas 绘制轨道投影与地面站可见窗口，探索数据可视化。
+            </p>
+            <div class="flex items-center gap-2">
+              <span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">Canvas API</span>
+              <span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">REST API</span>
+              <a href="#" class="p-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors ml-auto" title="GitHub"><i data-lucide="github" class="w-4 h-4"></i></a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Gallery -->
+    <section id="gallery" class="py-24 md:py-32 bg-background">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="max-w-2xl mb-16 reveal">
+          <p class="text-primary font-medium mb-2">影像墙</p>
+          <h2 class="text-3xl md:text-4xl font-bold tracking-tight mb-4">镜头里的结构与光</h2>
+          <p class="text-muted-foreground">工程是理性的，但光影、城市与生活是感性的。点击照片可放大查看。</p>
+        </div>
+        <div class="masonry reveal">
+          <figure class="rounded-xl overflow-clip border border-border group cursor-pointer" onclick="openLightbox('assets/gallery-architecture.jpg')">
+            <div class="relative">
+              <img src="assets/gallery-architecture.jpg" alt="建筑细部" class="w-full object-cover group-hover:scale-105 transition-transform duration-500">
+              <div class="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <i data-lucide="zoom-in" class="w-8 h-8 text-primary"></i>
+              </div>
+            </div>
+            <figcaption class="px-4 py-3 text-sm text-muted-foreground bg-card">建筑细部 · 材料与光影</figcaption>
+          </figure>
+          <figure class="rounded-xl overflow-clip border border-border group cursor-pointer" onclick="openLightbox('assets/hero-bg.jpg')">
+            <div class="relative">
+              <img src="assets/hero-bg.jpg" alt="主页主视觉" class="w-full object-cover group-hover:scale-105 transition-transform duration-500">
+              <div class="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <i data-lucide="zoom-in" class="w-8 h-8 text-primary"></i>
+              </div>
+            </div>
+            <figcaption class="px-4 py-3 text-sm text-muted-foreground bg-card">工程美学 · 智能未来</figcaption>
+          </figure>
+          <figure class="rounded-xl overflow-clip border border-border group cursor-pointer" onclick="openLightbox('assets/gallery-city.jpg')">
+            <div class="relative">
+              <img src="assets/gallery-city.jpg" alt="城市立交夜景" class="w-full object-cover group-hover:scale-105 transition-transform duration-500">
+              <div class="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <i data-lucide="zoom-in" class="w-8 h-8 text-primary"></i>
+              </div>
+            </div>
+            <figcaption class="px-4 py-3 text-sm text-muted-foreground bg-card">城市立交 · 流动与秩序</figcaption>
+          </figure>
+          <figure class="rounded-xl overflow-clip border border-border group cursor-pointer" onclick="openLightbox('assets/project-structural-ai.jpg')">
+            <div class="relative">
+              <img src="assets/project-structural-ai.jpg" alt="结构审图" class="w-full object-cover group-hover:scale-105 transition-transform duration-500">
+              <div class="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <i data-lucide="zoom-in" class="w-8 h-8 text-primary"></i>
+              </div>
+            </div>
+            <figcaption class="px-4 py-3 text-sm text-muted-foreground bg-card">结构审图 · AI 辅助</figcaption>
+          </figure>
+          <figure class="rounded-xl overflow-clip border border-border group cursor-pointer" onclick="openLightbox('assets/gallery-desk.jpg')">
+            <div class="relative">
+              <img src="assets/gallery-desk.jpg" alt="工作台" class="w-full object-cover group-hover:scale-105 transition-transform duration-500">
+              <div class="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <i data-lucide="zoom-in" class="w-8 h-8 text-primary"></i>
+              </div>
+            </div>
+            <figcaption class="px-4 py-3 text-sm text-muted-foreground bg-card">工作台 · 学习与创造</figcaption>
+          </figure>
+          <figure class="rounded-xl overflow-clip border border-border group cursor-pointer" onclick="openLightbox('assets/project-bim-search.jpg')">
+            <div class="relative">
+              <img src="assets/project-bim-search.jpg" alt="BIM 语义搜索" class="w-full object-cover group-hover:scale-105 transition-transform duration-500">
+              <div class="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <i data-lucide="zoom-in" class="w-8 h-8 text-primary"></i>
+              </div>
+            </div>
+            <figcaption class="px-4 py-3 text-sm text-muted-foreground bg-card">BIM 检索 · 语义连接</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- Moments: Music & Sakura -->
+    <section id="moments" class="py-24 md:py-32 blueprint-bg relative overflow-clip">
+      <div class="sakura-petal" style="left:12%; animation-duration:14s; animation-delay:0.5s;"></div>
+      <div class="sakura-petal" style="left:55%; animation-duration:17s; animation-delay:2.5s;"></div>
+      <div class="sakura-petal" style="left:85%; animation-duration:12s; animation-delay:1s;"></div>
+
+      <div class="max-w-6xl mx-auto px-6 relative z-10">
+        <div class="max-w-2xl mb-16 reveal">
+          <p class="text-primary font-medium mb-2">日常与灵感</p>
+          <h2 class="text-3xl md:text-4xl font-bold tracking-tight mb-4">樱花、音乐与慢节奏</h2>
+          <p class="text-muted-foreground">代码和图纸之外，这里是充电和放空的地方。</p>
+        </div>
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="rounded-2xl bg-card border border-border p-6 reveal">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-20 h-20 rounded-xl overflow-clip bg-muted shrink-0">
+                <img src="assets/gallery-desk.jpg" alt="歌单封面" class="w-full h-full object-cover">
+              </div>
+              <div class="min-w-0">
+                <h3 class="text-lg font-semibold truncate">正在循环</h3>
+                <p class="text-sm text-muted-foreground">我的 2026 春季歌单</p>
+                <p class="text-xs text-muted-foreground mt-1" id="nowPlaying">Sakura Days — Instrumental</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-4 mb-4">
+              <button id="playBtn" class="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors">
+                <i data-lucide="play" class="w-5 h-5" id="playIcon"></i>
+              </button>
+              <button class="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors" onclick="nextTrack()">
+                <i data-lucide="skip-forward" class="w-4 h-4"></i>
+              </button>
+              <div class="flex-1">
+                <div class="music-progress" onclick="seekMusic(event)">
+                  <div class="music-progress-fill" id="musicFill"></div>
+                </div>
+                <div class="flex justify-between text-xs text-muted-foreground mt-1">
+                  <span id="currentTime">1:18</span>
+                  <span id="totalTime">3:42</span>
+                </div>
+              </div>
+            </div>
+            <ul class="space-y-2 text-sm text-muted-foreground" id="trackList">
+              <li class="flex items-center justify-between p-3 rounded-lg bg-muted/50 cursor-pointer hover:bg-muted transition-colors" data-track="Sakura Days — Instrumental" data-time="3:42">
+                <span class="flex items-center gap-3">
+                  <i data-lucide="music" class="w-4 h-4 text-primary"></i>
+                  <span class="text-foreground">Sakura Days — Instrumental</span>
+                </span>
+                <span>3:42</span>
+              </li>
+              <li class="flex items-center justify-between p-3 rounded-lg bg-muted/30 cursor-pointer hover:bg-muted transition-colors" data-track="Concrete Dreams" data-time="4:05">
+                <span class="flex items-center gap-3">
+                  <i data-lucide="music" class="w-4 h-4 text-muted-foreground"></i>
+                  <span>Concrete Dreams</span>
+                </span>
+                <span>4:05</span>
+              </li>
+              <li class="flex items-center justify-between p-3 rounded-lg bg-muted/30 cursor-pointer hover:bg-muted transition-colors" data-track="Late Night CAD" data-time="2:58">
+                <span class="flex items-center gap-3">
+                  <i data-lucide="music" class="w-4 h-4 text-muted-foreground"></i>
+                  <span>Late Night CAD</span>
+                </span>
+                <span>2:58</span>
+              </li>
+            </ul>
+            <div class="mt-6 flex gap-3">
+              <a href="#" class="inline-flex items-center gap-2 text-sm px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors">
+                <i data-lucide="cloud" class="w-4 h-4"></i>
+                <span>网易云音乐</span>
+              </a>
+              <a href="#" class="inline-flex items-center gap-2 text-sm px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors">
+                <i data-lucide="headphones" class="w-4 h-4"></i>
+                <span>Spotify</span>
+              </a>
+            </div>
+          </div>
+          <div class="rounded-2xl bg-card border border-border p-8 reveal">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <i data-lucide="flower-2" class="w-8 h-8 text-primary"></i>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold">樱花季手记</h3>
+                <p class="text-sm text-muted-foreground">2026.04 · 兰州 / 西安</p>
+              </div>
+            </div>
+            <blockquote class="border-l-2 border-primary pl-4 italic text-foreground/90 mb-6">
+              “花瓣飘落的速度和结构变形的时程曲线一样，都需要耐心观察。建筑也一样——最好的作品往往藏在那些不被注意的细节里。”
+            </blockquote>
+            <p class="text-muted-foreground leading-relaxed mb-6">
+              每年春天都会去看樱花。工程让我学会理性拆解世界，而樱花提醒我要保留感性与耐心。设计与算法，最终都是为了让人生活得更好。
+            </p>
+            <div class="flex flex-wrap gap-2 text-xs">
+              <span class="px-3 py-1 rounded-full bg-primary/10 text-primary">#樱花</span>
+              <span class="px-3 py-1 rounded-full bg-primary/10 text-primary">#建筑摄影</span>
+              <span class="px-3 py-1 rounded-full bg-primary/10 text-primary">#慢生活</span>
+              <span class="px-3 py-1 rounded-full bg-primary/10 text-primary">#设计与算法</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="py-24 md:py-32 bg-background">
+      <div class="max-w-5xl mx-auto px-6">
+        <div class="grid lg:grid-cols-2 gap-12">
+          <div class="reveal">
+            <p class="text-primary font-medium mb-2">联系</p>
+            <h2 class="text-3xl md:text-4xl font-bold tracking-tight mb-6">一起造点有用的东西</h2>
+            <p class="text-muted-foreground mb-8">
+              如果你在找既懂工程又懂 AI 的伙伴，或者想聊聊结构、代码与创意，欢迎随时联系。我会尽快回复。
+            </p>
+            <div class="space-y-4">
+              <a href="mailto:hello@yadong.dev" class="flex items-center gap-4 p-4 rounded-xl bg-card border border-border hover:border-primary/40 transition-colors">
+                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><i data-lucide="mail" class="w-5 h-5 text-primary"></i></div>
+                <div><p class="font-medium">邮箱</p><p class="text-sm text-muted-foreground">hello@yadong.dev</p></div>
+              </a>
+              <a href="https://github.com/yadong" target="_blank" class="flex items-center gap-4 p-4 rounded-xl bg-card border border-border hover:border-primary/40 transition-colors">
+                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><i data-lucide="github" class="w-5 h-5 text-primary"></i></div>
+                <div><p class="font-medium">GitHub</p><p class="text-sm text-muted-foreground">github.com/yadong</p></div>
+              </a>
+              <a href="#" class="flex items-center gap-4 p-4 rounded-xl bg-card border border-border hover:border-primary/40 transition-colors">
+                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><i data-lucide="message-circle" class="w-5 h-5 text-primary"></i></div>
+                <div><p class="font-medium">微信公众号</p><p class="text-sm text-muted-foreground">@Yadong的建造笔记</p></div>
+              </a>
+            </div>
+          </div>
+
+          <form id="contactForm" class="p-6 md:p-8 rounded-2xl bg-card border border-border reveal">
+            <h3 class="text-lg font-semibold mb-6">发送消息</h3>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm text-muted-foreground mb-1">姓名</label>
+                <input type="text" required class="w-full px-4 py-3 rounded-lg bg-background border border-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring" placeholder="怎么称呼你">
+              </div>
+              <div>
+                <label class="block text-sm text-muted-foreground mb-1">邮箱</label>
+                <input type="email" required class="w-full px-4 py-3 rounded-lg bg-background border border-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring" placeholder="your@email.com">
+              </div>
+              <div>
+                <label class="block text-sm text-muted-foreground mb-1">留言</label>
+                <textarea rows="4" required class="w-full px-4 py-3 rounded-lg bg-background border border-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none" placeholder="想聊点什么？"></textarea>
+              </div>
+              <button type="submit" class="w-full py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>发送</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t border-border bg-background">
+      <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <p class="text-sm text-muted-foreground">© 2026 Yadong. 土木 × AI，持续建造中。</p>
+        <div class="flex items-center gap-4">
+          <a href="https://github.com/yadong" target="_blank" class="text-muted-foreground hover:text-primary transition-colors"><i data-lucide="github" class="w-5 h-5"></i></a>
+          <a href="mailto:hello@yadong.dev" class="text-muted-foreground hover:text-primary transition-colors"><i data-lucide="mail" class="w-5 h-5"></i></a>
+          <a href="#" class="text-muted-foreground hover:text-primary transition-colors"><i data-lucide="message-circle" class="w-5 h-5"></i></a>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+    <button class="absolute top-6 right-6 text-foreground/80 hover:text-foreground" onclick="closeLightbox()">
+      <i data-lucide="x" class="w-8 h-8"></i>
+    </button>
+    <img id="lightboxImg" src="" alt="放大查看">
   </div>
-</div></section>
 
-<!-- SKILLS -->
-<section class="section" id="skills"><div class="wrap">
-  <span class="sec-label">Skills</span>
-  <h2 class="sec-title">我会的</h2>
-  <p class="sec-desc">技术栈横跨前后端，核心是把想法变成能跑的东西。</p>
-  <div class="skills-g">
-    <div class="sk"><span class="sk-icon">⚡</span><div class="sk-name">前端开发</div><div class="sk-bar"><div class="sk-fill" style="width:88%"></div></div></div>
-    <div class="sk"><span class="sk-icon">🤖</span><div class="sk-name">AI / LLM</div><div class="sk-bar"><div class="sk-fill" style="width:75%"></div></div></div>
-    <div class="sk"><span class="sk-icon">🔧</span><div class="sk-name">后端服务</div><div class="sk-bar"><div class="sk-fill" style="width:80%"></div></div></div>
-    <div class="sk"><span class="sk-icon">🎨</span><div class="sk-name">UI 设计</div><div class="sk-bar"><div class="sk-fill" style="width:70%"></div></div></div>
-    <div class="sk"><span class="sk-icon">☁️</span><div class="sk-name">云服务</div><div class="sk-bar"><div class="sk-fill" style="width:72%"></div></div></div>
-    <div class="sk"><span class="sk-icon">📱</span><div class="sk-name">移动开发</div><div class="sk-bar"><div class="sk-fill" style="width:65%"></div></div></div>
+  <!-- Toast -->
+  <div id="toast" class="toast px-6 py-4 rounded-xl bg-card border border-border shadow-lg flex items-center gap-3">
+    <i data-lucide="check-circle" class="w-5 h-5 text-primary"></i>
+    <span class="text-sm">消息已发送，我会尽快回复你！</span>
   </div>
-</div></section>
 
-<!-- GALLERY -->
-<section class="section" id="gallery"><div class="wrap">
-  <span class="sec-label">Gallery</span>
-  <h2 class="sec-title">照片墙</h2>
-  <p class="sec-desc">记录一些值得留下的瞬间。</p>
-  <div class="gallery-g" id="photoGrid"></div>
-</div></section>
+  <!-- Back to top -->
+  <button id="backToTop" class="fixed bottom-8 right-8 z-50 p-3 rounded-full bg-primary text-primary-foreground shadow-lg opacity-0 pointer-events-none transition-opacity" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <i data-lucide="arrow-up" class="w-5 h-5"></i>
+  </button>
 
-<!-- TIMELINE -->
-<section class="section" id="timeline"><div class="wrap">
-  <span class="sec-label">Timeline</span>
-  <h2 class="sec-title">时间线</h2>
-  <div class="tl">
-    <div class="tl-item"><div class="tl-dot"></div><div class="tl-yr">2022</div><div class="tl-t">开始写代码</div><div class="tl-d">从第一行 Hello World 开始，走上折腾之路。</div></div>
-    <div class="tl-item"><div class="tl-dot"></div><div class="tl-yr">2024</div><div class="tl-t">深入探索 AI 与大语言模型</div><div class="tl-d">发现 AI 这个兔子洞，一头扎进去就出不来了。</div></div>
-    <div class="tl-item"><div class="tl-dot"></div><div class="tl-yr">2025</div><div class="tl-t">搭建个人网站</div><div class="tl-d">记录技术与生活，给自己一个角落。</div></div>
-    <div class="tl-item"><div class="tl-dot"></div><div class="tl-yr">2026</div><div class="tl-t">继续折腾，持续进化 🚀</div><div class="tl-d">路还长，慢慢走。</div></div>
-  </div>
-</div></section>
-
-<!-- CONTACT -->
-<section class="section" id="contact"><div class="wrap">
-  <span class="sec-label">Contact</span>
-  <h2 class="sec-title">找到我</h2>
-  <p class="sec-desc">有想法？想聊天？随时欢迎。</p>
-  <div class="contact-g">
-    <a class="cc" href="mailto:wyd2326239842@outlook.com"><div class="cc-ico">📧</div><div><div class="cc-l">邮件</div><div class="cc-v">wyd2326239842@outlook.com</div></div></a>
-    <a class="cc" href="https://github.com/2326239842" target="_blank"><div class="cc-ico">🐙</div><div><div class="cc-l">GitHub</div><div class="cc-v">@2326239842</div></div></a>
-    <a class="cc" href="https://x.com/WangYadong50669" target="blank"><div class="cc-ico">🐦</div><div><div class="cc-l">Twitter / X</div><div class="cc-v">@WangYadong50669</div></div></a>
-  </div>
-</div></section>
-
-<footer><div class="wrap" style="display:flex;align-items:center;justify-content:center;gap:1.5rem;flex-wrap:wrap">© 2026 Yadong's Space · Made with <span class="heart">❤</span> · <a href="https://yadongw118.dpdns.org" target="_blank" style="display:inline-flex;align-items:center;gap:.4rem;padding:.45rem 1.1rem;border-radius:999px;background:linear-gradient(135deg,var(--ac),var(--pink));color:#fff;font-size:.88rem;font-weight:700;text-decoration:none;transition:all .3s;box-shadow:0 4px 16px rgba(167,139,250,.3)" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(167,139,250,.4)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 16px rgba(167,139,250,.3)'"><span style="font-size:1.1rem">📖</span> 我的博客</a></div></footer>
-
-<!-- LIGHTBOX -->
-<div class="lb" id="lb" onclick="closeLb()">
-  <div class="lb-x">✕</div>
-  <div class="lb-box" id="lbBox"></div>
-</div>
-
-<script>
-// ─────────────────────────────────────────
-//  THEME
-// ─────────────────────────────────────────
-let isDark=true;
-function toggleTheme(){
-  isDark=!isDark;
-  document.body.classList.toggle('light',!isDark);
-  document.getElementById('themeBtn').textContent=isDark?'🌙':'☀';
-}
-
-// ─────────────────────────────────────────
-//  PHOTO WALL
-// ─────────────────────────────────────────
-const photos=[
-  {src:'images/1000078822.jpg',c:'日常记录',t:'生活',h:220},
-  {src:'images/微信图片_20260102215043_79_13.jpg',c:'美好瞬间',t:'风景',h:260},
-  {src:'images/IMG_1317.jpg',c:'值得留念',t:'日常',h:240},
-  {e:'🌅',c:'日出时分',t:'风景',h:200,g:['#1a0030','#6d28d9']},
-  {e:'🏙️',c:'城市夜景',t:'城市',h:260,g:['#0a1020','#1e3a5f']},
-  {e:'☕',c:'午后咖啡',t:'生活',h:185,g:['#1a0a00','#7c3c10']},
-  {e:'🌸',c:'樱花盛开',t:'风景',h:240,g:['#200018','#9d174d']},
-  {e:'🏔️',c:'远山如黛',t:'旅行',h:270,g:['#080d18','#1e3a5f']},
-  {e:'🌊',c:'海边漫步',t:'旅行',h:215,g:['#060d1a','#0f4c6b']},
-  {e:'💻',c:'深夜代码',t:'工作',h:180,g:['#080814','#1a1a40']},
-  {e:'🍜',c:'深夜食堂',t:'美食',h:200,g:['#150800','#6b2d00']},
-  {e:'🌙',c:'月色温柔',t:'风景',h:245,g:['#060812','#1a1e40']},
-  {e:'📚',c:'书架一角',t:'生活',h:210,g:['#0c0a08','#3d2b1f']},
-  {e:'🎵',c:'音乐时光',t:'日常',h:190,g:['#100820','#4a1a6b']},
-  {e:'🌿',c:'山间小径',t:'旅行',h:235,g:['#080f08','#1a4a20']},
-];
-const pg=document.getElementById('photoGrid');
-photos.forEach(p=>{
-  const d=document.createElement('div');
-  d.className='ph-item';
-  if(p.src){
-    d.innerHTML=`<div class="ph-inner" style="height:${p.h}px"><img src="${p.src}" alt="${p.c}" style="width:100%;height:100%;object-fit:cover"></div><div class="ph-ov"><span class="ph-cap">${p.c}</span></div><span class="ph-tag">${p.t}</span>`;
-  } else {
-    d.innerHTML=`<div class="ph-inner" style="height:${p.h}px;background:linear-gradient(145deg,${p.g[0]},${p.g[1]});font-size:3.2rem">${p.e}</div><div class="ph-ov"><span class="ph-cap">${p.c}</span></div><span class="ph-tag">${p.t}</span>`;
-  }
-  d.onclick=()=>{
-    const b=document.getElementById('lbBox');
-    if(p.src){
-      b.style.background='#000';
-      b.innerHTML=`<img src="${p.src}" style="max-width:90vw;max-height:85vh;object-fit:contain;border-radius:10px">`;
-    } else {
-      b.style.background=`linear-gradient(145deg,${p.g[0]},${p.g[1]})`;
-      b.textContent=p.e;
+  <script>
+    // Initialize Lucide icons
+    if (window.lucide) {
+      lucide.createIcons();
     }
-    document.getElementById('lb').classList.add('on');
-  };
-  pg.appendChild(d);
-});
-function closeLb(){document.getElementById('lb').classList.remove('on');document.getElementById('lbBox').innerHTML='';document.getElementById('lbBox').textContent='';}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLb()});
 
-// ─────────────────────────────────────────
-//  HERO PARTICLE ANIMATION
-// ─────────────────────────────────────────
-let heroWind=.5, heroAnimOn=true;
-const hCvs=document.getElementById('heroCanvas');
-const hCtx=hCvs.getContext('2d');
-let hW=0,hH=0,heroPetals=[];
-
-const HERO_SCENES={
-  cherry:{cols:['#ffb7c5','#ff8fa3','#ffc1cc','#ff6b9d'],sky0:'#07071a',sky1:'#160522'},
-  autumn:{cols:['#ff6b35','#f7931e','#ffd700','#ff4500'],sky0:'#100800',sky1:'#201000'},
-  snow:{cols:['#fff','#e8eeff','#d0d8f8','#c0c8f0'],sky0:'#060812',sky1:'#0a1020'},
-};
-let heroScene='cherry';
-
-function mkHeroPetal(spread){
-  const c=HERO_SCENES[heroScene].cols;
-  return{x:Math.random()*hW,y:spread?Math.random()*hH:-(Math.random()*50+5),vx:(Math.random()-.5)*.45,vy:.5+Math.random()*1,r:2+Math.random()*4,op:.3+Math.random()*.7,rot:Math.random()*6.28,rotV:(Math.random()-.5)*.055,wb:Math.random()*6.28,wbS:.012+Math.random()*.022,col:c[Math.floor(Math.random()*c.length)]};
-}
-function rebuildHeroPetals(n){heroPetals=[];for(let i=0;i<n;i++)heroPetals.push(mkHeroPetal(true))}
-rebuildHeroPetals(80);
-
-const hStars=[];
-for(let i=0;i<160;i++) hStars.push({x:Math.random(),y:Math.random()*.6,s:.3+Math.random()*1.3,o:.1+Math.random()*.5,f:Math.random()*6.28});
-
-let hT=0;
-function heroFrame(){
-  requestAnimationFrame(heroFrame);
-  if(!heroAnimOn) return;
-  hT+=.013;
-  const sc=HERO_SCENES[heroScene];
-  const bg=hCtx.createLinearGradient(0,0,0,hH);
-  bg.addColorStop(0,sc.sky0); bg.addColorStop(1,sc.sky1);
-  hCtx.fillStyle=bg; hCtx.fillRect(0,0,hW,hH);
-  hStars.forEach(s=>{
-    const tw=s.o*(.55+.45*Math.sin(hT*.7+s.f));
-    hCtx.beginPath(); hCtx.arc(s.x*hW,s.y*hH,s.s,0,6.28);
-    hCtx.fillStyle=`rgba(255,255,255,${tw.toFixed(2)})`; hCtx.fill();
-  });
-  heroPetals.forEach(p=>{
-    p.wb+=p.wbS; p.rot+=p.rotV;
-    p.x+=p.vx+Math.sin(p.wb)*heroWind*.4; p.y+=p.vy;
-    if(p.y>hH+15){const np=mkHeroPetal(false);Object.assign(p,np);}
-    hCtx.save(); hCtx.translate(p.x,p.y); hCtx.rotate(p.rot); hCtx.globalAlpha=p.op;
-    hCtx.beginPath(); hCtx.ellipse(0,0,p.r,p.r*.5,0,0,6.28);
-    hCtx.fillStyle=p.col; hCtx.shadowColor=p.col; hCtx.shadowBlur=5; hCtx.fill();
-    hCtx.globalAlpha*=.4; hCtx.beginPath(); hCtx.ellipse(-p.r*.2,-p.r*.1,p.r*.3,p.r*.18,-.5,0,6.28);
-    hCtx.fillStyle='rgba(255,255,255,.7)'; hCtx.shadowBlur=0; hCtx.fill();
-    hCtx.restore();
-  });
-}
-function setHeroScene(name,btn){
-  heroScene=name;
-  document.querySelectorAll('.sbtn').forEach(b=>b.classList.remove('on')); btn.classList.add('on');
-  const c=HERO_SCENES[name].cols;
-  heroPetals.forEach(p=>p.col=c[Math.floor(Math.random()*c.length)]);
-}
-function toggleHeroAnim(){heroAnimOn=!heroAnimOn;document.getElementById('animBtn').textContent=heroAnimOn?'▶':'⏸';}
-function resizeHero(){hW=hCvs.width=hCvs.offsetWidth;hH=hCvs.height=hCvs.offsetHeight;}
-window.addEventListener('resize',resizeHero);
-resizeHero(); heroFrame();
-
-// ─────────────────────────────────────────
-//  SAKURA INTERACTIVE TREE
-// ─────────────────────────────────────────
-(function(){
-  const cvs=document.getElementById('sakuraCanvas');
-  if(!cvs) return;
-  const ctx=cvs.getContext('2d');
-  let W,H,T=0,windX=0,windPush=0,mouseX=-999,mouseY=-999;
-
-  function resize(){W=cvs.width=cvs.offsetWidth;H=cvs.height=cvs.offsetHeight;buildTree();}
-
-  // Moon phase state
-  let moonPhase=0; // 0=full, 1-8=phases
-  let moonMsg='';
-  let moonMsgT=0;
-  const MOON_MSGS=['🌙 满月','🌗 下弦月','🌑 新月','🌒 上弦月','🌕 又是满月','🌙 月圆了','✨ 月色真美','💗 我想你了'];
-
-  // ── Tree ──
-  const branches=[];
-  function growBranch(x,y,angle,len,depth){
-    if(depth<0||len<5) return;
-    const ex=x+Math.cos(angle)*len;
-    const ey=y+Math.sin(angle)*len;
-    const b={
-      x,y,ex,ey,angle,len,depth,
-      thick:Math.max(.8,depth*1.7),
-      sway:Math.random()*6.28,
-      swayS:.006+Math.random()*.007,
-      blossoms:[]
-    };
-    if(depth<=2){
-      const n=3+Math.floor(Math.random()*7);
-      for(let i=0;i<n;i++){
-        b.blossoms.push({
-          ox:ex+(Math.random()-.5)*22,
-          oy:ey+(Math.random()-.5)*18,
-          r:3.5+Math.random()*5,
-          hue:338+Math.random()*28,
-          phase:Math.random()*6.28,
-          open:.5+Math.random()*.5,
-          sat:75+Math.random()*20
-        });
-      }
-    }
-    branches.push(b);
-    if(depth>0){
-      const sp=.28+.38*(1-depth/5);
-      growBranch(ex,ey,angle-sp-Math.random()*.18,len*.67,depth-1);
-      growBranch(ex,ey,angle+sp+Math.random()*.18,len*.64,depth-1);
-      if(depth>2&&Math.random()>.5)
-        growBranch(ex,ey,angle+(Math.random()-.5)*.55,len*.48,depth-2);
-    }
-  }
-
-  function buildTree(){
-    branches.length=0;
-    const cx=W*.5, base=H*.9;
-    const trunk=H*.26;
-    growBranch(cx,base,-Math.PI/2,trunk,5);
-  }
-
-  // ── Petals ──
-  const petals=[];
-  const MAXP=200;
-
-  function spawnPetal(x,y,burst){
-    const n=burst?16:1;
-    for(let i=0;i<n&&petals.length<MAXP;i++){
-      petals.push({
-        x:x+(Math.random()-.5)*(burst?70:15),
-        y:y+(Math.random()-.5)*(burst?35:8),
-        vx:(Math.random()-.5)*(burst?5:1.2),
-        vy:burst?-(2+Math.random()*5):-(0.2+Math.random()*.8),
-        r:2.5+Math.random()*4.5,
-        rot:Math.random()*6.28,
-        rotV:(Math.random()-.5)*.09,
-        wb:Math.random()*6.28,
-        wbS:.013+Math.random()*.018,
-        hue:335+Math.random()*32,
-        sat:80+Math.random()*18,
-        op:.9,
-        life:1,
-        decay:.003+Math.random()*.002+(burst?.003:0)
-      });
-    }
-  }
-
-  // Natural timed drop
-  let dropT=0;
-  function naturalDrop(){
-    const tips=branches.filter(b=>b.depth<=1);
-    if(!tips.length) return;
-    const b=tips[Math.floor(Math.random()*tips.length)];
-    spawnPetal(b.ex+(Math.random()-.5)*15,b.ey+(Math.random()-.5)*8,false);
-  }
-
-  // ── Interaction ──
-  function getPos(e){
-    const r=cvs.getBoundingClientRect();
-    if(e.touches) return{x:e.touches[0].clientX-r.left,y:e.touches[0].clientY-r.top};
-    return{x:e.clientX-r.left,y:e.clientY-r.top};
-  }
-
-  cvs.addEventListener('mousemove',e=>{
-    const p=getPos(e); mouseX=p.x; mouseY=p.y;
-    windX=(p.x/W-.5)*2;
-  });
-  cvs.addEventListener('mouseleave',()=>{mouseX=-999;windX=0;});
-  cvs.addEventListener('touchmove',e=>{
-    if(e.touches.length===1){
-      const p=getPos(e);mouseX=p.x;mouseY=p.y;windX=(p.x/W-.5)*1.5;
-    }
-  },{passive:true});
-
-  const MSGS=['🌸 春风拂过，花瓣如雪','✨ 每一片都是短暂的美丽','🌺 盛开即是别离的开始','💫 此刻，定格成永恒','🌿 感受春日最后的温柔','🎋 物哀之美，一期一会','🌙 花落，是另一种绽放'];
-  let msgIdx=0;
-
-  function showMsg(txt){
-    const el=document.getElementById('sakuraMsg'); if(!el) return;
-    el.style.opacity='0';
-    setTimeout(()=>{el.textContent=txt;el.style.opacity='1';},280);
-  }
-
-  cvs.addEventListener('click',e=>{
-    const {x,y}=getPos(e);
-    // Moon click
-    const moonDist=Math.sqrt((x-W*.76)**2+(y-H*.14)**2);
-    if(moonDist<40){
-      moonPhase=(moonPhase%8)+1;
-      moonMsg=MOON_MSGS[moonPhase-1];
-      moonMsgT=4;
-      // Spawn petals from moon area
-      for(let i=0;i<8;i++)spawnPetal(W*.76+(Math.random()-.5)*40,H*.14+(Math.random()-.5)*40,true);
-      return;
-    }
-    // Find nearest branch endpoint
-    let best=null,bestD=120;
-    branches.forEach(b=>{
-      const dx=b.ex-x,dy=b.ey-y;
-      const d=Math.sqrt(dx*dx+dy*dy);
-      if(d<bestD){bestD=d;best=b;}
-    });
-    if(best){
-      spawnPetal(best.ex,best.ey,true);
-      spawnDialogue(best.ex,best.ey-40);
-      windPush=(x<W/2?-1:1)*(1.5+Math.random()*2.5);
-      showMsg(MSGS[msgIdx++%MSGS.length]);
-    } else {
-      // click anywhere = wind gust
-      windPush=(x<W/2?-1:1)*(1+Math.random()*1.5);
-      if(petals.length<MAXP-20){
-        for(let i=0;i<3;i++){
-          const tips=branches.filter(b=>b.depth<=2);
-          if(tips.length){const b=tips[Math.floor(Math.random()*tips.length)];spawnPetal(b.ex,b.ey,false);}
+    // Scroll reveal
+    const revealEls = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
         }
-      }
-    }
-  });
-  cvs.addEventListener('touchstart',e=>{
-    const {x,y}=getPos(e);
-    // Moon touch
-    const moonDist=Math.sqrt((x-W*.76)**2+(y-H*.14)**2);
-    if(moonDist<50){
-      e.preventDefault();
-      moonPhase=(moonPhase%8)+1;
-      moonMsg=MOON_MSGS[moonPhase-1];
-      moonMsgT=4;
-      for(let i=0;i<8;i++)spawnPetal(W*.76+(Math.random()-.5)*40,H*.14+(Math.random()-.5)*40,true);
-      return;
-    }
-    // Branch tap - only prevent default if near a branch
-    let best=null,bestD=80;
-    branches.forEach(b=>{const dx=b.ex-x,dy=b.ey-y,d=Math.sqrt(dx*dx+dy*dy);if(d<bestD){bestD=d;best=b;}});
-    if(best){
-      e.preventDefault();
-      spawnPetal(best.ex,best.ey,true);
-      spawnDialogue(best.ex,best.ey-40);
-      showMsg(MSGS[msgIdx++%MSGS.length]);
-    }
-    // Otherwise let the page scroll normally
-  },{passive:false});
+      });
+    }, { threshold: 0.1 });
+    revealEls.forEach(el => observer.observe(el));
 
-  // ── Draw ──
-  let dropTimer=0;
-  function frame(){
-    requestAnimationFrame(frame);
-    T+=.011;
-    dropTimer+=.011;
-    if(dropTimer>.22+Math.random()*.3){dropTimer=0;naturalDrop();}
-    windPush*=.97;
-
-    // Sky
-    const sky=ctx.createLinearGradient(0,0,0,H);
-    sky.addColorStop(0,'#03030d');
-    sky.addColorStop(.45,'#08041a');
-    sky.addColorStop(1,'#130824');
-    ctx.fillStyle=sky; ctx.fillRect(0,0,W,H);
-
-    // Stars
-    for(let i=0;i<100;i++){
-      const sx=(Math.sin(i*137.5)*0.5+0.5)*W;
-      const sy=(Math.sin(i*91.3)*0.5+0.5)*H*.5;
-      const so=(.15+Math.sin(T*.5+i)*.1)*(.5+(i%4==0?.5:0));
-      ctx.beginPath(); ctx.arc(sx,sy,.3+(i%3==0?.6:.2),0,6.28);
-      ctx.fillStyle=`rgba(255,255,255,${so.toFixed(2)})`; ctx.fill();
-    }
-
-    // Moon glow + click interaction
-    const mx=W*.76, my=H*.14;
-    const moonG=ctx.createRadialGradient(mx,my,0,mx,my,100);
-    moonG.addColorStop(0,'rgba(255,248,225,.14)'); moonG.addColorStop(1,'transparent');
-    ctx.fillStyle=moonG; ctx.fillRect(0,0,W,H);
-    ctx.beginPath(); ctx.arc(mx,my,24,0,6.28);
-    ctx.fillStyle='rgba(255,250,235,.9)';
-    ctx.shadowColor='rgba(255,240,200,.7)'; ctx.shadowBlur=30;
-    ctx.fill(); ctx.shadowBlur=0;
-    // Moon phase overlay
-    if(moonPhase>0){
-      ctx.save();
-      ctx.globalAlpha=.95;
-      ctx.beginPath(); ctx.arc(mx,my,24,0,6.28); ctx.clip();
-      ctx.fillStyle='#03030d';
-      const phaseX=[24,18,0,-18,-24,-18,0,18][moonPhase-1];
-      ctx.beginPath(); ctx.ellipse(mx+phaseX,my,Math.abs(phaseX),24,0,0,6.28); ctx.fill();
-      ctx.restore();
-    }
-    // Moon click text
-    if(moonMsg){
-      moonMsgT-=.011;
-      ctx.save();
-      ctx.globalAlpha=Math.min(1,moonMsgT*2);
-      ctx.font='600 16px "PingFang SC","Noto Sans SC",sans-serif';
-      ctx.textAlign='center';
-      ctx.fillStyle='#f472b6';
-      ctx.shadowColor='rgba(244,114,182,.5)';
-      ctx.shadowBlur=12;
-      ctx.fillText(moonMsg,mx,my+50+Math.sin(T*2)*3);
-      ctx.shadowBlur=0;
-      ctx.restore();
-      if(moonMsgT<=0)moonMsg='';
-    }
-
-    // Bottom mist
-    const mist=ctx.createLinearGradient(0,H*.7,0,H);
-    mist.addColorStop(0,'transparent');
-    mist.addColorStop(1,'rgba(255,180,210,.06)');
-    ctx.fillStyle=mist; ctx.fillRect(0,0,W,H);
-
-    // Ground
-    ctx.beginPath();
-    ctx.moveTo(0,H*.88); ctx.lineTo(W,H*.88); ctx.lineTo(W,H); ctx.lineTo(0,H);
-    const gnd=ctx.createLinearGradient(0,H*.88,0,H);
-    gnd.addColorStop(0,'rgba(20,10,30,.8)'); gnd.addColorStop(1,'rgba(8,4,16,.95)');
-    ctx.fillStyle=gnd; ctx.fill();
-
-    // Ground petals (fallen)
-    ctx.save();
-    for(let i=0;i<18;i++){
-      const fx=(Math.sin(i*47.3)*0.5+0.5)*W;
-      const fy=H*.89+Math.sin(i*31.7)*H*.04;
-      ctx.globalAlpha=.15+Math.sin(i)*.05;
-      ctx.beginPath(); ctx.ellipse(fx,fy,3+i%3,1.5,i*.8,0,6.28);
-      ctx.fillStyle=`hsl(${340+i%25},85%,78%)`; ctx.fill();
-    }
-    ctx.restore();
-
-    // ── Branches ──
-    const effectiveWind=windX*.6+windPush*.08;
-    const sorted=[...branches].sort((a,b)=>b.depth-a.depth);
-    sorted.forEach(b=>{
-      b.sway+=b.swayS;
-      const sw=Math.sin(b.sway+T*.25)*(.4+Math.abs(effectiveWind)*.3)*(1/(b.depth+.5));
-      const swOff=sw*b.len*.06;
-      const ex=b.ex+swOff+effectiveWind*b.len*.025/(b.depth+1);
-      const ey=b.ey+Math.abs(sw)*b.len*.01;
-
-      ctx.beginPath();
-      ctx.moveTo(b.x,b.y);
-      ctx.quadraticCurveTo((b.x+ex)/2+swOff*.5,(b.y+ey)/2,ex,ey);
-      const bark=b.depth>3?`rgba(38,20,12,.95)`:`rgba(55,28,16,.9)`;
-      ctx.strokeStyle=bark; ctx.lineWidth=b.thick; ctx.lineCap='round'; ctx.stroke();
-
-      // Blossoms
-      b.blossoms.forEach(bl=>{
-        bl.phase+=.007;
-        const bx=bl.ox+swOff*1.4+effectiveWind*1.2+Math.sin(bl.phase)*.6;
-        const by=bl.oy+Math.cos(bl.phase*.8)*.4;
-
-        // Soft glow
-        const glw=ctx.createRadialGradient(bx,by,0,bx,by,bl.r*2.5);
-        glw.addColorStop(0,`hsla(${bl.hue},${bl.sat}%,85%,.2)`);
-        glw.addColorStop(1,'transparent');
-        ctx.beginPath(); ctx.arc(bx,by,bl.r*2.5,0,6.28);
-        ctx.fillStyle=glw; ctx.fill();
-
-        // 5-petal flower
-        for(let p=0;p<5;p++){
-          const pa=(p/5)*6.28+bl.phase*.2;
-          const px=bx+Math.cos(pa)*bl.r*.65;
-          const py=by+Math.sin(pa)*bl.r*.65;
-          ctx.beginPath();
-          ctx.ellipse(px,py,bl.r*.58,bl.r*.36,pa,0,6.28);
-          ctx.fillStyle=`hsla(${bl.hue},${bl.sat}%,83%,${bl.open*.82})`;
-          ctx.fill();
+    // Skill bars animation
+    const skillBars = document.querySelectorAll('.skill-fill');
+    const skillObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.style.width = entry.target.dataset.width + '%';
+          skillObserver.unobserve(entry.target);
         }
-        ctx.beginPath(); ctx.arc(bx,by,bl.r*.2,0,6.28);
-        ctx.fillStyle=`hsla(${bl.hue+15},70%,95%,.9)`; ctx.fill();
+      });
+    }, { threshold: 0.3 });
+    skillBars.forEach(bar => skillObserver.observe(bar));
+
+    // Counter animation
+    const counters = document.querySelectorAll('.counter');
+    const counterObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const el = entry.target;
+          const target = parseInt(el.dataset.target, 10);
+          const duration = 1500;
+          const start = performance.now();
+          function update(now) {
+            const p = Math.min((now - start) / duration, 1);
+            const ease = 1 - Math.pow(1 - p, 3);
+            el.textContent = Math.floor(target * ease);
+            if (p < 1) requestAnimationFrame(update);
+          }
+          requestAnimationFrame(update);
+          counterObserver.unobserve(el);
+        }
+      });
+    }, { threshold: 0.5 });
+    counters.forEach(c => counterObserver.observe(c));
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     });
 
-    // ── Falling petals ──
-    ctx.save();
-    for(let i=petals.length-1;i>=0;i--){
-      const p=petals[i];
-      // Mouse repulsion
-      if(mouseX>0){
-        const dx=p.x-mouseX,dy=p.y-mouseY;
-        const d=Math.sqrt(dx*dx+dy*dy);
-        if(d<90){p.vx+=dx/d*.05;p.vy+=dy/d*.02;}
+    // Scroll progress + back to top
+    const progress = document.getElementById('scrollProgress');
+    const backToTop = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      progress.style.width = pct + '%';
+      if (scrollTop > 500) {
+        backToTop.classList.remove('opacity-0', 'pointer-events-none');
+      } else {
+        backToTop.classList.add('opacity-0', 'pointer-events-none');
       }
-      p.wb+=p.wbS;
-      p.rot+=p.rotV;
-      p.vx+=(effectiveWind*.018)+Math.sin(p.wb)*.022+globalWindWave*.01;
-      p.vy+=.028; // gravity
-      p.vx*=.985; p.vy*=.988;
-      p.x+=p.vx; p.y+=p.vy;
-      p.life-=p.decay;
+    });
 
-      if(p.life<=0||p.y>H+20){petals.splice(i,1);continue;}
-
-      const alpha=Math.min(p.life*.95,.9);
-      ctx.save();
-      ctx.translate(p.x,p.y); ctx.rotate(p.rot);
-      ctx.globalAlpha=alpha;
-
-      ctx.beginPath();
-      ctx.ellipse(0,0,p.r,p.r*.48,0,0,6.28);
-      ctx.fillStyle=`hsla(${p.hue},${p.sat}%,82%,1)`;
-      ctx.shadowColor=`hsla(${p.hue},90%,78%,1)`; ctx.shadowBlur=6;
-      ctx.fill();
-
-      ctx.globalAlpha=alpha*.45;
-      ctx.beginPath();
-      ctx.ellipse(-p.r*.22,-p.r*.1,p.r*.32,p.r*.17,-.55,0,6.28);
-      ctx.fillStyle='rgba(255,255,255,.75)'; ctx.shadowBlur=0;
-      ctx.fill();
-      ctx.restore();
+    // Lightbox
+    function openLightbox(src) {
+      const lb = document.getElementById('lightbox');
+      document.getElementById('lightboxImg').src = src;
+      lb.classList.add('active');
+      document.body.style.overflow = 'hidden';
     }
-    ctx.restore();
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('active');
+      document.body.style.overflow = '';
+    }
 
-    // Vignette
-    const vig=ctx.createRadialGradient(W*.5,H*.5,H*.15,W*.5,H*.5,H*.9);
-    vig.addColorStop(0,'transparent'); vig.addColorStop(1,'rgba(0,0,0,.6)');
-    ctx.fillStyle=vig; ctx.fillRect(0,0,W,H);
-  }
+    // Contact form toast
+    document.getElementById('contactForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const toast = document.getElementById('toast');
+      toast.classList.add('show');
+      e.target.reset();
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    });
 
-  window.addEventListener('resize',()=>{resize();});
-  document.addEventListener('visibilitychange',()=>{});
-  resize();
-  frame();
-})();
+    // Music player (visual)
+    const tracks = [
+      { title: 'Sakura Days — Instrumental', time: '3:42' },
+      { title: 'Concrete Dreams', time: '4:05' },
+      { title: 'Late Night CAD', time: '2:58' }
+    ];
+    let playing = false;
+    let currentTrack = 0;
+    const playBtn = document.getElementById('playBtn');
+    const playIcon = document.getElementById('playIcon');
+    const nowPlaying = document.getElementById('nowPlaying');
+    const musicFill = document.getElementById('musicFill');
+    const trackItems = document.querySelectorAll('#trackList li');
 
-// ─────────────────────────────────────────
-//  NAV SCROLL
-// ─────────────────────────────────────────
-window.addEventListener('scroll',()=>{
-  document.getElementById('nav').classList.toggle('scrolled',scrollY>20);
-},{passive:true});
+    function updateTrackList() {
+      trackItems.forEach((item, idx) => {
+        const icon = item.querySelector('[data-lucide]');
+        if (idx === currentTrack) {
+          item.classList.remove('bg-muted/30');
+          item.classList.add('bg-muted/50');
+          item.querySelector('span.text-foreground')?.classList.add('text-foreground');
+          if (icon) icon.classList.add('text-primary');
+        } else {
+          item.classList.add('bg-muted/30');
+          item.classList.remove('bg-muted/50');
+          if (icon) icon.classList.remove('text-primary');
+        }
+      });
+      nowPlaying.textContent = tracks[currentTrack].title;
+      document.getElementById('totalTime').textContent = tracks[currentTrack].time;
+      musicFill.style.width = '0%';
+      if (window.lucide) lucide.createIcons();
+    }
 
-document.querySelectorAll('a[href^="#"]').forEach(a=>{
-  a.addEventListener('click',e=>{
-    const t=document.querySelector(a.getAttribute('href'));
-    if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}
-    document.getElementById('panel').classList.remove('on');
-  });
-});
+    playBtn.addEventListener('click', () => {
+      playing = !playing;
+      playIcon.setAttribute('data-lucide', playing ? 'pause' : 'play');
+      if (window.lucide) lucide.createIcons();
+    });
 
-// ─────────────────────────────────────────
-//  SCROLL PROGRESS BAR
-// ─────────────────────────────────────────
-const scrollThumb=document.getElementById('scrollThumb');
-const scrollBarEl=document.getElementById('scrollBar');
-window.addEventListener('scroll',()=>{
-  const h=document.documentElement.scrollHeight-window.innerHeight;
-  const pct=h>0?(scrollY/h)*100:0;
-  scrollThumb.style.height=pct+'%';
-},{passive:true});
+    function nextTrack() {
+      currentTrack = (currentTrack + 1) % tracks.length;
+      playing = true;
+      playIcon.setAttribute('data-lucide', 'pause');
+      updateTrackList();
+    }
 
-// Click scroll bar to jump to next section
-function scrollToNext(e){
-  const sections=document.querySelectorAll('.section, .sakura-page, .hero');
-  const y=e.clientY;
-  for(const s of sections){
-    const r=s.getBoundingClientRect();
-    if(r.bottom>y+50){s.scrollIntoView({behavior:'smooth',block:'start'});break;}
-  }
-}
+    trackItems.forEach((item, idx) => {
+      item.addEventListener('click', () => {
+        currentTrack = idx;
+        playing = true;
+        playIcon.setAttribute('data-lucide', 'pause');
+        updateTrackList();
+      });
+    });
 
-// Drag scroll bar
-let dragSB=false;
-scrollBarEl.addEventListener('mousedown',e=>{dragSB=true;e.preventDefault();});
-scrollBarEl.addEventListener('touchstart',e=>{dragSB=true;e.preventDefault();},{passive:false});
-window.addEventListener('mousemove',e=>{if(!dragSB)return;scrollToDrag(e.clientY);});
-window.addEventListener('touchmove',e=>{if(!dragSB)return;e.preventDefault();scrollToDrag(e.touches[0].clientY);},{passive:false});
-window.addEventListener('mouseup',()=>dragSB=false);
-window.addEventListener('touchend',()=>dragSB=false);
-function scrollToDrag(clientY){
-  const rect=scrollBarEl.getBoundingClientRect();
-  const pct=Math.max(0,Math.min(1,(clientY-rect.top)/rect.height));
-  const h=document.documentElement.scrollHeight-window.innerHeight;
-  window.scrollTo(0,pct*h);
-}
+    function seekMusic(e) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const p = (e.clientX - rect.left) / rect.width;
+      musicFill.style.width = Math.max(0, Math.min(100, p * 100)) + '%';
+    }
 
-// ─────────────────────────────────────────
-//  MUSIC PLAYER
-// ─────────────────────────────────────────
-let musicPlaying=false;
-const bgm=document.getElementById('bgm');
-const musicPlayer=document.getElementById('musicPlayer');
+    // Simulate music progress
+    setInterval(() => {
+      if (playing) {
+        const w = parseFloat(musicFill.style.width) || 0;
+        musicFill.style.width = Math.min(100, w + 0.5) + '%';
+      }
+    }, 1000);
+  </script>
 
-function toggleMusic(){
-  if(!bgm.src){bgm.src=document.getElementById('musicSelect').value;}
-  if(musicPlaying){bgm.pause();musicPlaying=false;document.getElementById('musicToggle').textContent='🎵';}
-  else{bgm.volume=.18;bgm.play();musicPlaying=true;document.getElementById('musicToggle').textContent='⏸️';}
-}
-function switchMusic(){
-  const wasPlaying=musicPlaying;
-  bgm.src=document.getElementById('musicSelect').value;
-  if(wasPlaying){bgm.volume=.18;bgm.play();}
-}
+    <style>
+    .hero-bg {
+      background-image: linear-gradient(135deg, rgba(11,15,18,0.94) 0%, rgba(11,15,18,0.72) 50%, rgba(13,148,136,0.16) 100%), url('assets/hero-bg.jpg');
+      background-size: cover;
+      background-position: center;
+    }
+    .blueprint-bg {
+      background-color: var(--yd-background);
+      background-image:
+        linear-gradient(rgba(13,148,136,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(13,148,136,0.06) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+    .text-shadow-hero {
+      text-shadow: 0 2px 24px rgba(2,8,16,0.8);
+    }
+    .overflow-clip {
+      overflow: hidden;
+    }
+    .sakura-petal {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: radial-gradient(circle at 30% 30%, #ffd1dc, #ffb7c5);
+      border-radius: 60% 40% 70% 30% / 40% 50% 60% 50%;
+      opacity: 0.6;
+      pointer-events: none;
+      animation: fall linear infinite;
+    }
+    @keyframes fall {
+      0% { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 0; }
+      10% { opacity: 0.7; }
+      90% { opacity: 0.7; }
+      100% { transform: translateY(110vh) translateX(20px) rotate(360deg); opacity: 0; }
+    }
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .masonry {
+      columns: 1;
+      column-gap: 1rem;
+    }
+    @media (min-width: 640px) { .masonry { columns: 2; } }
+    @media (min-width: 1024px) { .masonry { columns: 3; } }
+    .masonry > * { break-inside: avoid; margin-bottom: 1rem; }
 
-// Show player + auto-play on first click
-document.addEventListener('click',()=>{
-  musicPlayer.style.opacity='1';
-  musicPlayer.style.transform='translateY(0)';
-  if(!musicPlaying){
-    bgm.src=document.getElementById('musicSelect').value;
-    bgm.volume=.18;
-    bgm.play().then(()=>{musicPlaying=true;document.getElementById('musicToggle').textContent='⏸️';}).catch(()=>{});
-  }
-},{once:true});
+    .skill-track {
+      background: var(--yd-muted);
+      border-radius: 999px;
+      height: 8px;
+      overflow: hidden;
+    }
+    .skill-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--yd-primary), #2dd4bf);
+      border-radius: 999px;
+      width: 0;
+      transition: width 1.2s ease-out;
+    }
 
-// ─────────────────────────────────────────
-//  GLOBAL WIND WAVE
-// ─────────────────────────────────────────
-let globalWindWave=0;
-setInterval(()=>{globalWindWave=(Math.random()-.5)*5;},4500);
+    .spin-slow {
+      animation: spin 20s linear infinite;
+    }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-// ─────────────────────────────────────────
-//  DIALOG SYSTEM
-// ─────────────────────────────────────────
-const DIALOGUES=[
-  '你也来看樱花吗？',
-  '风会记得花的方向。',
-  '有些春天，只能经历一次。',
-  '花会再开，人不会重来。',
-  '今晚的月色很好。',
-  '别停下脚步。',
-  '一期一会。',
-  '有些相遇，本来就短暂。',
-  '樱花落下的速度是每秒五厘米。'
-];
-function spawnDialogue(x,y){
-  const el=document.createElement('div');
-  el.className='dialog-bubble';
-  el.style.left=x+'px';
-  el.style.top=y+'px';
-  el.innerHTML=DIALOGUES[Math.floor(Math.random()*DIALOGUES.length)];
-  document.getElementById('dialogLayer').appendChild(el);
-  setTimeout(()=>el.remove(),5000);
-}
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 2px;
+      background: var(--yd-primary);
+      z-index: 100;
+      width: 0%;
+      transition: width 0.1s linear;
+    }
 
-// ─────────────────────────────────────────
-//  SIDE PETALS
-// ─────────────────────────────────────────
-function spawnSidePetal(){
-  const el=document.createElement('div');
-  el.className='side-petal';
-  el.innerHTML='🌸';
-  const left=Math.random()>.5;
-  el.style.left=left?(Math.random()*10)+'vw':(90+Math.random()*10)+'vw';
-  el.style.animationDuration=(8+Math.random()*10)+'s';
-  el.style.fontSize=(14+Math.random()*30)+'px';
-  document.getElementById('sidePetals').appendChild(el);
-  setTimeout(()=>el.remove(),18000);
-}
-setInterval(spawnSidePetal,600);
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      background: rgba(11,15,18,0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .lightbox.active { display: flex; }
+    .lightbox img { max-height: 90vh; max-width: 100%; border-radius: 12px; }
 
-</script>
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 90;
+      transform: translateY(120%);
+      transition: transform 0.4s ease-out;
+    }
+    .toast.show { transform: translateY(0); }
+
+    .music-progress {
+      background: var(--yd-muted);
+      border-radius: 999px;
+      height: 4px;
+      cursor: pointer;
+    }
+    .music-progress-fill {
+      height: 100%;
+      width: 35%;
+      background: var(--yd-primary);
+      border-radius: 999px;
+    }
+  </style>
 </body>
 </html>
-
